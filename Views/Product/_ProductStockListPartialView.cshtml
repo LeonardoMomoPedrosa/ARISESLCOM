@@ -1,0 +1,37 @@
+﻿@model List<ARISESLCOM.Models.ProductViewModel>
+@using ARISESLCOM.Helpers;
+
+<script src="~/js/commLibrary.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.stockcheckbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function (event) {
+            event.preventDefault();
+            var formElement = this.closest('form');
+            var containerElement = this.closest('.container');
+            const divAlert = containerElement.querySelector('.updAlert');
+            const divSpin = undefined;
+
+            commLibrary.slfetch('/Product/ChangeStock', 'POST', formElement, divSpin, divAlert, 'Erro ao atualizar produto');
+
+            });
+        });
+    });
+</script>
+@foreach (var item in Model)
+{
+    <div class="row striped container">
+        <div class="col-md-1">
+            <form class="update-form">
+                <input type="hidden" asp-for="@item.PKId" class="hiddenId" />
+                <input class="form-check-input stockcheckbox" type="checkbox" id="estoqueCheck" name="item.Estoque" @(item.Estoque.Equals("true") ? "checked" : "") />
+            </form>
+        </div>
+        <div class="col-md-8 text-sm">@Html.Raw(PageLabelHelper.FormatProductName(item.Nome))</div>
+        <div class="col-md-3" style="height:30px;">
+            <div id="alert" class="alert alert-xsm alert-primary d-none updAlert fade" role="alert">
+            </div>
+        </div>
+    </div>
+}
+

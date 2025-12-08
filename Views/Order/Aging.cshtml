@@ -1,0 +1,86 @@
+﻿@using ARISESLCOM.Helpers;
+@model List<ARISESLCOM.Models.Reports.OrderStatusReportModel>
+@{
+    var statusList = Model.Select(s => s.Status).Distinct();
+}
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Situação</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5 class="mb-3">Situação de Vendas</h5>
+
+        @foreach (var status in statusList)
+        {
+            var list = Model.Where(s => s.Status.Equals(status));
+            var t15 = list.Where(s => s.Diff < 15).Sum(t => t.Total);
+            var q15 = list.Count(s => s.Diff < 15);
+
+            var t30 = list.Where(s => s.Diff < 30 && s.Diff >= 15).Sum(t => t.Total);
+            var q30 = list.Count(s => s.Diff < 30 && s.Diff >= 15);
+
+            var t60 = list.Where(s => s.Diff < 60 && s.Diff >= 30).Sum(t => t.Total);
+            var q60 = list.Count(s => s.Diff < 60 && s.Diff >= 30);
+
+            var t90 = list.Where(s => s.Diff < 90 && s.Diff >= 60).Sum(t => t.Total);
+            var q90 = list.Count(s => s.Diff < 90 && s.Diff >= 60);
+
+            var t90p = list.Where(s => s.Diff >= 90).Sum(t => t.Total);
+            var q90p = list.Count(s => s.Diff >= 90);
+
+            var ttot = t15 + t30 + t60 + t90 + t90p;
+            var qtot = q15 + q30 + q60 + q90 + q90p;
+
+            <div>
+                <table class="table table-sm table-striped" style="width:500px;">
+                    <thead>
+                        <tr>
+                            <th colspan="3">
+                                @PageLabelHelper.HeaderNewOrderDict[@status]
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>15 dias</td>
+                            <td>@t15.ToString("F")</td>
+                            <td>@q15</td>
+                        </tr>
+                        <tr>
+                            <td>15 a 30 dias</td>
+                            <td>@t30.ToString("F")</td>
+                            <td>@q30</td>
+                        </tr>
+                        <tr>
+                            <td>30 a 60 dias</td>
+                            <td>@t60.ToString("F")</td>
+                            <td>@q60</td>
+                        </tr>
+                        <tr>
+                            <td>60 a 90 dias</td>
+                            <td>@t90.ToString("F")</td>
+                            <td>@q90</td>
+                        </tr>
+                        <tr>
+                            <td>mais de 90 dias</td>
+                            <td>@t90p.ToString("F")</td>
+                            <td>@q90p</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Total</th>
+                            <th>@ttot.ToString("F")</th>
+                            <th>@qtot</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        }
+    </div>
+</div>

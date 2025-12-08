@@ -1,0 +1,286 @@
+﻿@model List<ARISESLCOM.Models.DestaqueViewModel>
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Gerenciar Carrossel</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Gerenciar Carrossel da Página Inicial</h5>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addImageModal">
+                    <i class="fas fa-plus"></i> Adicionar Imagem
+                </button>
+            </div>
+
+            <div class="row" id="carouselImages">
+                @foreach (var item in Model)
+                {
+                    <div class="col-md-4 mb-3" data-id="@item.PKId">
+                        <div class="card">
+                            <div class="card-img-container" style="height: 200px; overflow: hidden;">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" class="card-img-top" alt="Carousel Image" style="width: 100%; height: 100%; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="d-flex align-items-center justify-content-center bg-light" style="height: 100%;">
+                                        <span class="text-muted">Sem imagem</span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title">@item.Arquivo</h6>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        Link: @(string.IsNullOrEmpty(item.Link) ? "Nenhum" : item.Link)
+                                    </small>
+                                </p>
+                                <div class="btn-group w-100" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary edit-btn" data-id="@item.PKId" data-link="@item.Link">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-btn" data-id="@item.PKId">
+                                        <i class="fas fa-trash"></i> Excluir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-images fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhuma imagem no carrossel</h5>
+                    <p class="text-muted">Clique em "Adicionar Imagem" para começar</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Add Image Modal -->
+<div class="modal fade" id="addImageModal" tabindex="-1" aria-labelledby="addImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addImageModalLabel">Adicionar Imagem ao Carrossel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addImageForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="imageFile" class="form-label">Imagem *</label>
+                        <input type="file" class="form-control" id="imageFile" name="file" accept="image/*" required>
+                        <div class="form-text">Formatos aceitos: JPG, JPEG, PNG, WEBP</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="imageLink" class="form-label">Link (opcional)</label>
+                        <input type="url" class="form-control" id="imageLink" name="link" placeholder="https://exemplo.com">
+                        <div class="form-text">URL para onde a imagem deve redirecionar</div>
+                    </div>
+                    <div class="mb-3">
+                        <div id="imagePreview" class="text-center" style="display: none;">
+                            <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" id="addSpinner"></span>
+                        Adicionar Imagem
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Image Modal -->
+<div class="modal fade" id="editImageModal" tabindex="-1" aria-labelledby="editImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editImageModalLabel">Editar Imagem do Carrossel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editImageForm" enctype="multipart/form-data">
+                <input type="hidden" id="editImageId" name="id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editImageFile" class="form-label">Nova Imagem (opcional)</label>
+                        <input type="file" class="form-control" id="editImageFile" name="file" accept="image/*">
+                        <div class="form-text">Deixe em branco para manter a imagem atual ou atualizar apenas o link</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editImageLink" class="form-label">Link</label>
+                        <input type="url" class="form-control" id="editImageLink" name="link" placeholder="https://exemplo.com">
+                    </div>
+                    <div class="mb-3">
+                        <div id="editImagePreview" class="text-center" style="display: none;">
+                            <img id="editPreviewImg" src="" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" id="editSpinner"></span>
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/commLibrary.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Image preview for add modal
+        document.getElementById('imageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        // Image preview for edit modal
+        document.getElementById('editImageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('editImagePreview');
+            const previewImg = document.getElementById('editPreviewImg');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        // Add image form submission
+        document.getElementById('addImageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const spinner = document.getElementById('addSpinner');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            spinner.classList.remove('d-none');
+            submitBtn.disabled = true;
+            
+            fetch('/Content/UploadCarouselImage', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erro: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Erro: ' + error.message);
+            })
+            .finally(() => {
+                spinner.classList.add('d-none');
+                submitBtn.disabled = false;
+            });
+        });
+
+        // Edit image form submission
+        document.getElementById('editImageForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const spinner = document.getElementById('editSpinner');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            spinner.classList.remove('d-none');
+            submitBtn.disabled = true;
+            
+            fetch('/Content/UploadCarouselImage', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erro: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Erro: ' + error.message);
+            })
+            .finally(() => {
+                spinner.classList.add('d-none');
+                submitBtn.disabled = false;
+            });
+        });
+
+        // Edit button click
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const link = this.dataset.link;
+                
+                document.getElementById('editImageId').value = id;
+                document.getElementById('editImageLink').value = link || '';
+                
+                const modal = new bootstrap.Modal(document.getElementById('editImageModal'));
+                modal.show();
+            });
+        });
+
+        // Delete button click
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (confirm('Tem certeza que deseja excluir esta imagem do carrossel?')) {
+                    const id = this.dataset.id;
+                    
+                    fetch(`/Content/DeleteCarouselItem?id=${id}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Erro: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erro: ' + error.message);
+                    });
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,31 @@
+﻿@model ARISESLCOM.Models.DateModel
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Seleção de Grupo</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5 class="mb-3">Faturamento Por Grupo</h5>
+        <br />
+        <label for="data" class="form-label">Selecione a Data</label>
+        <form method="post" action="GroupItemSelect">
+            <div class="row">
+                <div class="col-auto">
+                    <input asp-for="Month" class="form-control form-control-sm" value="@DateTime.Today.ToString("yyyy-MM")" />
+                    <span asp-validation-for="Month" class="text-danger text-sm"></span><br />
+                    <input type="submit" value="Enviar" class="btn btn-sm btn-primary mt-3" />
+                    <br />
+                    <br />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+﻿@model ARISESLCOM.Models.CupomReportRequestModel
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Relatório de Cupom</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5 class="mb-3">Relatório de Cupom</h5>
+        <br />
+        <form method="post" action="CupomReport">
+            <div class="row">
+                <div class="col-auto mb-3">
+                    <label for="Month" class="form-label">Selecione o Mês</label>
+                    @{
+                        var minDate = new DateTime(2024, 9, 1);
+                        var maxDate = DateTime.Now;
+                    }
+                    <input asp-for="Month" type="month" class="form-control form-control-sm" 
+                           min="@minDate.ToString("yyyy-MM")" 
+                           max="@maxDate.ToString("yyyy-MM")" 
+                           value="@maxDate.ToString("yyyy-MM")" required />
+                    <span asp-validation-for="Month" class="text-danger text-sm"></span>
+                    <small class="form-text text-muted">Meses disponíveis: Set/2024 até @maxDate.ToString("MMM/yyyy", new System.Globalization.CultureInfo("pt-BR"))</small>
+                </div>
+                <div class="col-auto mb-3">
+                    <label for="Cupom" class="form-label">Selecione o Cupom</label>
+                    <select asp-for="Cupom" class="form-control form-control-sm" required>
+                        <option value="AQUAFLOW">AQUAFLOW</option>
+                    </select>
+                    <span asp-validation-for="Cupom" class="text-danger text-sm"></span>
+                </div>
+                <div class="col-auto mb-3 d-flex align-items-end">
+                    <input type="submit" value="Gerar Relatório" class="btn btn-sm btn-primary" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+

@@ -1,0 +1,16 @@
+﻿@model List<ARISESLCOM.Models.ProductViewModel>
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item">Produtos sem estoque</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5 class="mb-2">Produtos sem estoque</h5>
+        @await Html.PartialAsync("_ProductListPartialView", Model)
+    </div>
+</div>

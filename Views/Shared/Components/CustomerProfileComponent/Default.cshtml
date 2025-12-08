@@ -1,0 +1,8 @@
+﻿@model List<CustomerProfileModel>
+@using ARISESLCOM.Helpers;
+
+<section>
+    @foreach (var item in Model) {
+        <span>@item.Count @Html.Raw(PageLabelHelper.HeaderNewOrderDict[item.OrderStatus])</span><br />
+    }
+</section>

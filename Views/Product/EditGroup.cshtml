@@ -1,0 +1,90 @@
+﻿@model List<ARISESLCOM.Models.Entities.ProductTypeModel>
+<script src="~/js/commLibrary.js"></script>
+<script>
+       document.addEventListener('DOMContentLoaded', () => {
+
+       document.querySelectorAll('.update-img').forEach(button => {
+           button.addEventListener('click', function (event) {
+               event.preventDefault();
+               var formElement = this.closest('form');
+               const divAlert = formElement.querySelector('.updAlert');
+               const divSpin = undefined;
+
+               commLibrary.slfetch('/Group/PatchGroup', 'PATCH', formElement, divSpin, divAlert, 'Erro ao atualizar grupo');
+
+           });
+       });
+
+       document.querySelectorAll('.delete-img').forEach(button => {
+           button.addEventListener('click', function (event) {
+               event.preventDefault();
+
+               if (confirm('O grupo será apagado')) {
+                   if (confirm('Deseja mesmo apagar?')) {
+                       var formElement = this.closest('form');
+                       const divAlert = formElement.querySelector('.updAlert');
+                       const divSpin = undefined;
+                       const hiddenId = formElement.querySelector('.hiddenId');
+                       result = commLibrary.slfetch('/Group/DeleteGroup?id='+hiddenId.value, 'DELETE', formElement, divSpin, divAlert, 'Erro ao deletar sub grupo', formElement);
+                   }
+               }
+           });
+       });
+    });
+</script>
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item">Editar Grupos</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5 class="mb-4">Editar Grupos</h5>
+        <div class="container" style="background-color:aliceblue;">
+            <form action="/Group/New" method="POST">
+                <div class="row row-cols-2">
+                    <div class="col">
+                        <input type="text" required placeholder="Novo Grupo" class="form-control form-control-sm mt-2" name="tipo" />
+                    </div>
+                    <div class="col">
+                    </div>
+                    <div class="col">
+                        <textarea required placeholder="Descrição do Novo Grupo" class="form-control form-control-sm mt-1 mb-2" name="descricao" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-3" style="height:30px;">
+                        <input type="image" src="~/images/add.png" class="mt-2" title="Novo Item" />&nbsp;&nbsp;
+                    </div>
+                </div>
+                <hr />
+            </form>
+        </div>
+        @foreach (var item in Model)
+        {
+            <div class="container striped">
+                <form class="update-form">
+                    <div class="row row-cols-2">
+                        <div class="col-md-8">
+                            <input type="hidden" asp-for="@item.PKId" class="hiddenId" />
+                            <input type="text" class="form-control form-control-sm mt-2" asp-for="@item.Tipo" />
+
+                        </div>
+                        <div class="col-md-4">
+                        </div>
+                        <div class="col-md-8">
+                            <textarea class="form-control form-control-sm mt-1 mb-2" asp-for="@item.Descricao" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-4" style="height:30px;">
+                            <input type="image" src="~/images/update.png" class="update-img mt-2" title="Atualizar Item" />&nbsp;&nbsp;
+                            <input type="image" src="~/images/delete.png" class="delete-img" title="Deletar Item" />
+                            <div id="alert" class="alert alert-xsm alert-primary d-none updAlert fade mt-2" role="alert"></div>
+                        </div>
+                    </div>
+                    <hr />
+                </form>
+            </div>
+        }
+    </div>
+</div>

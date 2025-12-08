@@ -1,0 +1,106 @@
+﻿@model List<ARISESLCOM.Models.Entities.CustomerModel>
+<script src="~/js/commLibrary.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.notrustCheck').forEach(checkbox => {
+            checkbox.addEventListener('change', function (event) {
+            event.preventDefault();
+            //var formElement = this.closest('form');
+            var formElement = undefined;
+            var containerElement = this.closest('.container');
+            const divAlert = containerElement.querySelector('.updAlert');
+            const divSpin = undefined;
+            const hiddenCustomerId = containerElement.querySelector('.hiddenCustomerId');
+            var notrustCheck = containerElement.querySelector('.notrustCheck');
+            commLibrary.slfetch('/Customer/ChangeTrust?customerId='+hiddenCustomerId.value+'&trustInd='+notrustCheck.checked, 'PATCH', formElement, divSpin, divAlert, 'Erro ao atualizar cliente');
+
+            });
+        });
+
+        document.querySelectorAll('.btnDiscount').forEach(button => {
+            button.addEventListener('click', function (event) {
+            event.preventDefault();
+            var formElement = undefined;
+            var containerElement = this.closest('.container');
+            const divAlert = containerElement.querySelector('.updAlert');
+            const divSpin = undefined;
+            const hiddenCustomerId = containerElement.querySelector('.hiddenCustomerId');
+            const textboxDiscount = containerElement.querySelector('.inputDiscountAmt');
+            var labelDiscountAmount = containerElement.querySelector('.labelDiscountAmount');
+            commLibrary.slfetch('/Customer/ChangeDiscount?customerId='+hiddenCustomerId.value+'&discount='+textboxDiscount.value, 'PATCH', formElement, divSpin, divAlert, 'Erro ao atualizar cliente', undefined, function (data) {
+                    labelDiscountAmount.innerText = textboxDiscount.value;
+                    textboxDiscount.value = '';
+                });
+
+            });
+        });
+
+        document.querySelectorAll('.btnCredit').forEach(button => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                var formElement = undefined;
+                var containerElement = this.closest('.container');
+                const divAlert = containerElement.querySelector('.updAlert');
+                const divSpin = undefined;
+                const hiddenCustomerId = containerElement.querySelector('.hiddenCustomerId');
+                const textboxCredit = containerElement.querySelector('.inputCreditAmt');
+                var labelCreditAmount = containerElement.querySelector('.labelCreditAmount');
+                commLibrary.slfetch('/Customer/AddCredit?customerId='+hiddenCustomerId.value+'&credit='+textboxCredit.value, 'PATCH', formElement, divSpin, divAlert, 'Erro ao atualizar cliente', undefined, (data1) => {
+                    const newCreditNumber = Number(data1.newCredit);
+                    labelCreditAmount.innerText = isNaN(newCreditNumber)
+                        ? data1.newCredit
+                        : newCreditNumber.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    textboxCredit.value = '';
+                });
+            });
+        });
+
+    });
+</script>
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><a href="/Customer/SearchInput">Consulta Cliente</a></li>
+                <li class="breadcrumb-item">Resultado da busca</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5>Consultar Cliente</h5>
+        <div class="mt-3">
+            @foreach (var item in Model)
+            {
+                <div class="container striped mt-4">
+                    <form class="update-form">
+                        <div class="row row-cols-2">
+                            <div class="col-md-5">
+                                <input type="hidden" class="hiddenCustomerId" asp-for="@item.Id" class="hiddenId" />
+                                <div class="row align-items-center">
+                                    <div class="col"><b>@item.Id - @item.Name</b></div>
+                                </div>
+                                <div><a href="mailto:@item.Email">@item.Email</a> / @item.Senha</div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input notrustCheck" type="checkbox" id="notrustCheck" name="item.Notrust" @(item.Confiavel == 2 ? "checked" : "") />
+                                    <label class="form-check-label" for="notrustCheck">Não Confiável</label>
+                                </div>
+                                <div>Desconto <label class="labelDiscountAmount">@item.Desconto</label> %</div>
+                                <div>Crédito R$ <label class="labelCreditAmount">@item.Credito.ToString("F2")</label></div>
+                                <div class="row align-items-center ms-4">
+                                    <input id="discountInput" type="number" class="form-control form-control-sm inputDiscountAmt w-25 ms-1" />&nbsp;%&nbsp;&nbsp;<input type="button" value="Aplicar desconto" class="btn btn-sm btn-primary col-auto btnDiscount" />
+                                </div>
+                                <div class="row align-items-center mt-1 ms-1">
+                                    R$&nbsp;<input id="creditInput" type="number" class="form-control form-control-sm inputCreditAmt w-25" />&nbsp;&nbsp;<input type="button" value="Aplicar crédito" class="btn btn-sm btn-primary col-auto ms-3 btnCredit" />
+                                </div>
+                            </div>
+                            <div class="col-md-7" style="height:30px;">
+                                <div id="alert" class="alert alert-xsm alert-primary d-none updAlert fade mt-2" role="alert"></div>                                
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>

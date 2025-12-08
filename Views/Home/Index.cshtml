@@ -1,0 +1,627 @@
+﻿@using ARISESLCOM.Helpers
+@using ARISESLCOM.Services
+@using SLCOMLIB.Helpers
+@inject IConfiguration Configuration
+@{
+    ViewData["Title"] = "Dashboard - Gerência E-commerce";
+    var siteBaseUrl = Configuration["SiteApi:Servers:0:BaseUrl"]?.TrimEnd('/');
+}
+@model ARISESLCOM.Models.HomeViewModel;
+@{
+    var newOSCount = Model.OrderStatusReportList.Count(s => s.Status.Equals(LibConsts.ORDER_STATUS_NOVO));
+    var waitCardOSCount = Model.OrderStatusReportList.Count(s => s.Status.Equals(LibConsts.ORDER_STATUS_CCREDITO));
+    var waitComprovOSCount = Model.OrderStatusReportList.Count(s => s.Status.Equals(LibConsts.ORDER_STATUS_AG_COMPROV));
+    var boletoOSCount = Model.OrderStatusReportList.Count(s => s.Status.Equals(LibConsts.ORDER_STATUS_BOLETO));
+    var prepOSCount = Model.OrderStatusReportList.Count(s => s.Status.Equals(LibConsts.ORDER_STATUS_PAGTO_CONF_PREP));
+    var quarentOSCount = Model.OrderStatusReportList.Count(s => s.Status.Equals(LibConsts.ORDER_STATUS_QUARENTENA));
+    var waitStockOSCount = Model.OrderStatusReportList.Count(s => s.Status.Equals(LibConsts.ORDER_STATUS_AG_ESTOQUE));
+    // Usar o campo Count do modelo em vez de Count() do LINQ
+    var recursadoOSCount = Model.OrderStatusTodayReportList.Find(s => s.Status.Equals(LibConsts.ORDER_STATUS_N_AUTORIZ))?.Count ?? 0;
+    var cancOSCount = Model.OrderStatusTodayReportList.Find(s => s.Status.Equals(LibConsts.ORDER_STATUS_CANC))?.Count ?? 0;
+    var sentOSCount = Model.OrderStatusTodayReportList.Find(s => s.Status.Equals(LibConsts.ORDER_STATUS_ENVIADO))?.Count ?? 0;
+    var totalPending = newOSCount + waitCardOSCount + waitComprovOSCount + prepOSCount + quarentOSCount + waitStockOSCount;
+}
+
+<div class="dashboard-container">
+    <!-- Statistics Cards -->
+    <div class="row mb-2">
+        <div class="col mb-2">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-card-icon">
+                    🛒
+                </div>
+                <div class="stat-card-content">
+                    <h3 class="stat-card-number">@totalPending</h3>
+                    <p class="stat-card-label">Pedidos Pendentes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col mb-2">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="@LibConsts.ORDER_STATUS_NOVO" class="stat-card-link">
+                <div class="stat-card stat-card-info">
+                    <div class="stat-card-icon">
+                        ⭐
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 class="stat-card-number">@newOSCount</h3>
+                        <p class="stat-card-label">Pedidos Novos</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col mb-2">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="sent-today" class="stat-card-link">
+                <div class="stat-card stat-card-success">
+                    <div class="stat-card-icon">
+                        🚚
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 class="stat-card-number">@sentOSCount</h3>
+                        <p class="stat-card-label">Enviados Hoje</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col mb-2">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="rejected-today" class="stat-card-link">
+                <div class="stat-card stat-card-warning">
+                    <div class="stat-card-icon">
+                        ⚠️
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 class="stat-card-number">@recursadoOSCount</h3>
+                        <p class="stat-card-label">Recusados Hoje</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col mb-2">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="cancelled-today" class="stat-card-link">
+                <div class="stat-card stat-card-danger">
+                    <div class="stat-card-icon">
+                        ❌
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 class="stat-card-number">@cancOSCount</h3>
+                        <p class="stat-card-label">Cancelados Hoje</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Grid - 2 Columns Layout -->
+    <div class="row">
+        <!-- Left Column - Management Sections -->
+        <div class="col-lg-8">
+            <div class="row">
+                <!-- Orders Section -->
+                <div class="col-md-6 mb-3">
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h5 class="section-title">
+                                🛍️ Gestão de Pedidos
+                            </h5>
+                        </div>
+                        <div class="section-content">
+                            <div class="quick-action-grid">
+                                <a asp-area="" asp-controller="Order" asp-action="ListarPrevia" class="quick-action-item">
+                                    📋 Listar Pedidos
+                                </a>
+                                <a asp-area="" asp-controller="Order" asp-action="Search" class="quick-action-item">
+                                    🔍 Buscar Pedidos
+                                </a>
+                                <a asp-area="" asp-controller="Order" asp-action="SendList" class="quick-action-item">
+                                    📤 Enviar Pedidos
+                                </a>
+                                <a asp-area="" asp-controller="Acr" asp-action="Index" class="quick-action-item">
+                                    💳 Cobrança e.Rede
+                                </a>
+                                <a asp-area="" asp-controller="Order" asp-action="Tracking" class="quick-action-item">
+                                    🚛 Inserir Rastreamento
+                                </a>
+                                <a href="/Tracking/Follow" class="quick-action-item">
+                                    🔍 Ver Rastreamento
+                                </a>
+                                <a asp-area="" asp-controller="Order" asp-action="Aging" class="quick-action-item">
+                                    📈 Situação de Vendas
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Section -->
+                <div class="col-md-6 mb-3">
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h5 class="section-title">
+                                📦 Gestão de Produtos
+                            </h5>
+                        </div>
+                        <div class="section-content">
+                            <div class="quick-action-grid">
+                                <a asp-area="" asp-controller="Product" asp-action="NewSelect" class="quick-action-item">
+                                    ➕ Novo Produto
+                                </a>
+                                <a asp-area="" asp-controller="Product" asp-action="EditSelect" class="quick-action-item">
+                                    ✏️ Editar Produto
+                                </a>
+                                <a asp-area="" asp-controller="Product" asp-action="ProductNoStock" class="quick-action-item">
+                                    ⚠️ Prod. sem Estoque
+                                </a>
+                                <a asp-area="" asp-controller="Product" asp-action="ProductStock" class="quick-action-item">
+                                    ✅ Prod. com Estoque
+                                </a>
+                                <a asp-area="" asp-controller="Product" asp-action="AnimalNoStock" class="quick-action-item">
+                                    <span style="text-decoration: line-through;">🐠</span> Anim. sem Estoque
+                                </a>
+                                <a asp-area="" asp-controller="Product" asp-action="AnimalStock" class="quick-action-item">
+                                    🐠 Anim. com Estoque
+                                </a>
+                                <a asp-area="" asp-controller="Product" asp-action="EditGroup" class="quick-action-item">
+                                    🏷️ Editar Grupos
+                                </a>
+                                <a asp-area="" asp-controller="Product" asp-action="EditSubGroupSelect" class="quick-action-item">
+                                    🏷️ Editar Sub Grupos
+                                </a>
+                                <a asp-area="" asp-controller="Report" asp-action="AviseMeReport" class="quick-action-item">
+                                    <span style="font-size: 1.5em; line-height: 1;">🚦</span> Relatório Avise-me
+                                </a>
+                                <a asp-area="" asp-controller="Product" asp-action="IntegrationSelect" class="quick-action-item">
+                                    🔄 Integração ERP
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports & Management Section -->
+                <div class="col-12 mb-3">
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h5 class="section-title">
+                                📊 Relatórios & Gestão
+                            </h5>
+                        </div>
+                        <div class="section-content">
+                            <div class="quick-action-grid">
+                                <a asp-area="" asp-controller="Report" asp-action="DaySelect" class="quick-action-item">
+                                    📅 Faturamento Diário
+                                </a>
+                                <a asp-area="" asp-controller="Report" asp-action="MonthSelect" class="quick-action-item">
+                                    📆 Relatório Mensal
+                                </a>
+                                <a asp-area="" asp-controller="Report" asp-action="GroupSelect" class="quick-action-item">
+                                    📊 Por Grupo
+                                </a>
+                                <a asp-area="" asp-controller="Report" asp-action="CupomReportSelect" class="quick-action-item">
+                                    🎫 Relatório de Cupom
+                                </a>
+                                <a asp-area="" asp-controller="Content" asp-action="Carousel" class="quick-action-item">
+                                    🖼️ Carrossel
+                                </a>
+                                <a asp-area="" asp-controller="Customer" asp-action="SearchInput" class="quick-action-item">
+                                    👥 Consulta Cliente
+                                </a>
+                                <a asp-area="" asp-controller="Content" asp-action="Mosaic" class="quick-action-item">
+                                    🔲 Mosaico
+                                </a>
+                                <a asp-area="" asp-controller="Gerencia" asp-action="ConfigGerais" class="quick-action-item">
+                                    ⚙️ Config. Gerais
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Order Queue Status -->
+        <div class="col-lg-4">
+            <div class="dashboard-section status-section">
+                <div class="section-header">
+                    <h5 class="section-title">
+                        📋 Status da Fila
+                    </h5>
+                </div>
+                <div class="section-content">
+                    <div class="status-grid">
+                        <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="@LibConsts.ORDER_STATUS_NOVO" class="status-link">
+                            <div class="status-item status-new">
+                                <div class="status-icon">⭐</div>
+                                <div class="status-info">
+                                    <span class="status-label">Novas</span>
+                                    <span class="status-count">@newOSCount</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="@LibConsts.ORDER_STATUS_CCREDITO" class="status-link">
+                            <div class="status-item status-waiting">
+                                <div class="status-icon">💳</div>
+                                <div class="status-info">
+                                    <span class="status-label">Aguardando Cartão</span>
+                                    <span class="status-count">@waitCardOSCount</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="@LibConsts.ORDER_STATUS_AG_COMPROV" class="status-link">
+                            <div class="status-item status-waiting">
+                                <div class="status-icon">📄</div>
+                                <div class="status-info">
+                                    <span class="status-label">Aguardando Comprovante</span>
+                                    <span class="status-count">@waitComprovOSCount</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="@LibConsts.ORDER_STATUS_PAGTO_CONF_PREP" class="status-link">
+                            <div class="status-item status-processing">
+                                <div class="status-icon">⚙️</div>
+                                <div class="status-info">
+                                    <span class="status-label">Processo de Envio</span>
+                                    <span class="status-count">@prepOSCount</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="@LibConsts.ORDER_STATUS_QUARENTENA" class="status-link">
+                            <div class="status-item status-quarantine">
+                                <div class="status-icon">🛡️</div>
+                                <div class="status-info">
+                                    <span class="status-label">Quarentena</span>
+                                    <span class="status-count">@quarentOSCount</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="@LibConsts.ORDER_STATUS_AG_ESTOQUE" class="status-link">
+                            <div class="status-item status-waiting">
+                                <div class="status-icon">📦</div>
+                                <div class="status-info">
+                                    <span class="status-label">Aguardando Estoque</span>
+                                    <span class="status-count">@waitStockOSCount</span>
+                                </div>
+                            </div>
+                        </a>
+                        <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="rejected-today" class="status-link">
+                            <div class="status-item status-rejected">
+                                <div class="status-icon">❌</div>
+                                <div class="status-info">
+                                    <span class="status-label">Recusados Hoje</span>
+                                    <span class="status-count">@recursadoOSCount</span>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="status-item status-cancelled">
+                            <div class="status-icon">🚫</div>
+                            <div class="status-info">
+                                <span class="status-label">Cancelados Hoje</span>
+                                <span class="status-count">@cancOSCount</span>
+                            </div>
+                        </div>
+                        <div class="status-item status-sent">
+                            <div class="status-icon">✅</div>
+                            <div class="status-info">
+                                <span class="status-label">Enviados Hoje</span>
+                                <span class="status-count">@sentOSCount</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+    .dashboard-container {
+        padding: 15px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+
+
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 8px 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-left: 3px solid;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+
+    .stat-card-primary { border-left-color: #3498db; }
+    .stat-card-info { border-left-color: #9b59b6; }
+    .stat-card-success { border-left-color: #27ae60; }
+    .stat-card-warning { border-left-color: #f39c12; }
+    .stat-card-danger { border-left-color: #e74c3c; }
+
+    .stat-card-icon {
+        font-size: 1.5rem;
+        margin-right: 10px;
+        opacity: 0.8;
+        line-height: 1;
+    }
+
+    .stat-card-primary .stat-card-icon { color: #3498db; }
+    .stat-card-info .stat-card-icon { color: #9b59b6; }
+    .stat-card-success .stat-card-icon { color: #27ae60; }
+    .stat-card-warning .stat-card-icon { color: #f39c12; }
+    .stat-card-danger .stat-card-icon { color: #e74c3c; }
+
+    .stat-card-number {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin: 0;
+        color: #2c3e50;
+        line-height: 1.2;
+    }
+
+    .stat-card-label {
+        font-size: 0.75rem;
+        color: #7f8c8d;
+        margin: 0;
+        font-weight: 500;
+        line-height: 1.2;
+    }
+
+    .stat-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .stat-card-link:hover {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .stat-card-link:hover .stat-card {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .dashboard-section {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+    }
+
+    .section-title {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .section-content {
+        padding: 15px;
+    }
+
+    .quick-action-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    
+    .status-section .quick-action-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-action-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #2c3e50;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        font-size: 0.9rem;
+    }
+
+    .quick-action-item:hover {
+        background: #e9ecef;
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .quick-action-item {
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .status-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .status-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .status-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .status-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .status-link:hover {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .status-link:hover .status-item {
+        transform: translateX(8px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        background-color: rgba(255,255,255,0.9);
+    }
+
+    .status-icon {
+        font-size: 1rem;
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+        line-height: 1;
+    }
+
+    .status-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex: 1;
+    }
+
+    .status-label {
+        font-weight: 500;
+        color: #2c3e50;
+        font-size: 0.8rem;
+    }
+
+    .status-count {
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 3px 8px;
+        border-radius: 15px;
+        color: white;
+    }
+
+    .status-new { background: #e3f2fd; color: #1976d2; border-left: 3px solid #1976d2; }
+    .status-new .status-count { background: #1976d2; color: white; }
+
+    .status-waiting { background: #fff3e0; color: #f57c00; border-left: 3px solid #f57c00; }
+    .status-waiting .status-count { background: #f57c00; color: white; }
+
+    .status-processing { background: #e8f5e8; color: #388e3c; border-left: 3px solid #388e3c; }
+    .status-processing .status-count { background: #388e3c; color: white; }
+
+    .status-quarantine { background: #f3e5f5; color: #7b1fa2; border-left: 3px solid #7b1fa2; }
+    .status-quarantine .status-count { background: #7b1fa2; color: white; }
+
+    .status-rejected { background: #ffebee; color: #d32f2f; border-left: 3px solid #d32f2f; }
+    .status-rejected .status-count { background: #d32f2f; color: white; }
+
+    .status-cancelled { background: #fafafa; color: #616161; border-left: 3px solid #616161; }
+    .status-cancelled .status-count { background: #616161; color: white; }
+
+    .status-sent { background: #e8f5e8; color: #2e7d32; border-left: 3px solid #2e7d32; }
+    .status-sent .status-count { background: #2e7d32; color: white; }
+    
+    .status-section {
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+    }
+    
+    .status-section .status-grid {
+        gap: 6px;
+    }
+    
+    .status-section .status-item {
+        padding: 6px 10px;
+    }
+    
+    .status-section .status-icon {
+        font-size: 0.9rem;
+        margin-right: 8px;
+        width: 18px;
+    }
+    
+    .status-section .status-label {
+        font-size: 0.75rem;
+    }
+    
+    .status-section .status-count {
+        font-size: 0.8rem;
+        padding: 2px 6px;
+    }
+
+     @@media (max-width: 768px) {
+        .quick-action-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .dashboard-title {
+            font-size: 1.2rem;
+        }
+        
+        .stat-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .stat-card-icon {
+            margin-right: 0;
+            margin-bottom: 10px;
+        }
+        
+        .status-section {
+            position: relative;
+            top: auto;
+            max-height: none;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('pt-BR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            const currentTimeElement = document.getElementById('current-time');
+            if (currentTimeElement) {
+                currentTimeElement.textContent = timeString;
+            }
+        }
+
+        updateTime();
+        setInterval(updateTime, 60000); // Update every minute
+
+        // Add loading animation to quick actions
+        document.querySelectorAll('.quick-action-item').forEach(item => {
+            item.addEventListener('click', function() {
+                this.style.opacity = '0.7';
+                this.style.transform = 'scale(0.95)';
+            });
+        });
+    </script>
+}

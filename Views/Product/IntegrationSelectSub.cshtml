@@ -1,0 +1,30 @@
+﻿@using Microsoft.AspNetCore.Http;
+@model List<ARISESLCOM.Models.Entities.ProductSubTypeModel>
+
+@{
+    var id = Context.Request.Query["id"].ToString();
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/Product/IntegrationSelect">Integração Loja - Tipo</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Sub Tipo</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5>Selectione o Sub Tipo</h5>
+        <div class="mt-3">
+            @foreach (var item in Model)
+            {
+                <a href="/Product/Integration?id=@id&sid=@item.PKId">@item.SubType</a>
+
+                <br />
+            }
+            <br /><br />
+        </div>
+    </div>
+</div>

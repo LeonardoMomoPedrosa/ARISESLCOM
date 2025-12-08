@@ -1,0 +1,28 @@
+﻿@model List<ARISESLCOM.Models.Entities.ProductTypeModel>
+
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Novo Produto - Tipo</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5>Inserir Novo Produto</h5>
+        <form method="get" asp-controller="Product" asp-action="NewP" class="mt-3" id="formPT">
+            <select class="form-select w-auto col-auto" id="iddd" name="id" asp-items="@(new SelectList(Model,"PKId","Tipo"))" onchange="this.form.submit()">
+                <option selected>Selecione o tipo</option>
+            </select>
+        </form>
+        <div class="mt-3">
+            Ou<br />
+            <a href="/Product/NewP?id=21">Peixes Doce</a><br />
+            <a href="/Product/NewP?id=8">Plantas Vivas</a>
+            <br />
+            <br />
+        </div>
+    </div>
+</div>

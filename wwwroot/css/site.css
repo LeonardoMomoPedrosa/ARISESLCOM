@@ -1,0 +1,124 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.print-only {
+    display: none;
+}
+
+@media print {
+    .print-only {
+        display: block !important;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+a {
+    text-decoration: none;
+}
+
+    a:hover {
+        font-weight: 600;
+    }
+
+h5 {
+    margin-bottom: 1px;
+}
+
+.table-xsm {
+    font-size: 11px;
+}
+
+    .table-xsm tr {
+        line-height: 10px;
+    }
+
+    .table-xsm td {
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+
+    .table-xsm th {
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+
+.table-xsm2 {
+    font-size: 12px;
+}
+
+    .table-xsm2 tr {
+        line-height: 3px;
+    }
+
+.text-sm {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.rset {
+    text-align: right;
+}
+
+/* Hide the arrows in Chrome, Safari, Edge, Opera */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Hide the arrows in Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.form-check-input.custom-small {
+    width: 1rem;
+    height: 1rem;
+}
+
+.form-check-label.custom-small {
+    font-size: 0.75rem;
+}
+
+.alert-sm {
+    padding: 0.25rem 0.5rem; /* Smaller padding */
+    font-size: 0.875rem; /* Smaller font size */
+}
+
+.fade {
+    transition: opacity 1s ease !important; /* Change 1s to your desired duration */
+}
+
+.striped:nth-child(odd) {
+    background-color: #f8f9fa; /* Light gray for odd rows */
+    margin-left: 0px;
+}
+
+.striped:nth-child(even) {
+    background-color: #e9ecef; /* Slightly darker gray for even rows */
+    margin-left: 0px;
+}
+
+.alert-xsm {
+    padding: 0.25rem 0.5rem; /* Smaller padding */
+    font-size: 0.75rem; /* Smaller font size */
+}

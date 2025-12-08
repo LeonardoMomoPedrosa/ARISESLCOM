@@ -1,0 +1,25 @@
+﻿@model List<ARISESLCOM.Models.ProductViewModel>
+@{
+    var id = Context.Request.Query["id"].ToString();
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/Product/EditSelect">Editar - Tipo</a></li>
+                @if (!id.Equals("") && !id.Equals("0"))
+                {
+                    <li class="breadcrumb-item"><a href="/Product/EditSelectSub?id=@id">Editar - Sub Tipo</a></li>
+                }
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5>Editar Produtos</h5>
+        @await Html.PartialAsync("_ProductListPartialView", Model)
+    </div>
+<script src="~/js/commLibrary.js"></script>
+<script src="~/js/product-edit.js?v=3"></script>
+</div>

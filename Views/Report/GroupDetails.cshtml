@@ -1,0 +1,61 @@
+﻿@using ARISESLCOM.Helpers;
+@using System.Text.RegularExpressions
+@using SLCOMLIB.Helpers
+@model List<ARISESLCOM.Models.Reports.GroupItemReportModel>
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a asp-action="GroupSelect">Seleção de Grupos</a></li>
+                <li class="breadcrumb-item active"><a asp-action="GroupItemNavSelect" asp-route-month="@ViewBag.Month.ToString("MMyyyy")">Grupos</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@LibPageLabelHelper.TipoProdutoLabelDict[ViewBag.Subtipo]</li>
+            </ol>
+        </nav>
+        <div class="col bg-light border">
+            <h5>Produtos</h5>
+            @ViewBag.Month.ToString("MM/yyyy")
+            <table class="table table-xsm table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Produto
+                        </th>
+                        <th class="rset">
+                            Venda
+                        </th>
+                        <th class="rset">
+                            Custo
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        item.Name ??= "";
+                        var displayName = Regex.Split(item.Name, "<br>", RegexOptions.IgnoreCase)[0];
+                        <tr>
+                            <td>
+                                @Html.Raw(displayName)
+                            </td>
+                            <td class="rset">
+                                @item.Amount.ToString("C")
+                            </td>
+                            <td class="rset">
+                                @item.Cost.ToString("C")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <th class="rset">Total @Model.Select(s => s.Amount).Sum().ToString("C")</th>
+                        <th class="rset">@Model.Select(s => s.Cost).Sum().ToString("C")</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

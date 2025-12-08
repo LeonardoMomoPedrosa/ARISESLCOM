@@ -1,0 +1,86 @@
+﻿@model ARISESLCOM.Models.NewProductViewModel;
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+@{
+    var subTypeList = Model.SubTypeList;
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Product" asp-action="NewSelect">Novo Produto - Tipo</a></li>
+                <li class="breadcrumb-item active">Dados</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5>Inserir Novo Produto</h5>
+        <div>
+            <form class="row" method="post" asp-action="SaveProduct">
+                <div class="col-12">
+                    <input type="hidden" asp-for="ProductModel.Tipo" value="@Model.IdTipo" />
+                    <label for="nome" class="mt-2">Nome do Produto</label>
+                    <input type="text" asp-for="ProductModel.Nome" class="form-control form-control-sm" id="nome" />
+                    <span asp-validation-for="ProductModel.Nome" class="text-danger text-sm"></span><br />
+                    <label for="nome">Descrição</label>
+                    <textarea rows="3" asp-for="ProductModel.Descricao" class="form-control form-control-sm" id="nome"></textarea>
+                    <span asp-validation-for="ProductModel.Descricao" class="text-danger text-sm"></span><br />
+                    <label for="metanome">Meta Nome (simplificado)</label>
+                    <input type="text" asp-for="ProductModel.MetaNome" class="form-control form-control-sm" id="metanome" />
+                    <span asp-validation-for="ProductModel.MetaNome" class="text-danger text-sm"></span><br />
+                    <label for="metakey" class="mt-2">Meta Key (chave de busca)</label>
+                    <input type="text" asp-for="ProductModel.MetaKey" class="form-control form-control-sm" id="metakey" placeholder="separado por ','" />
+                    <span asp-validation-for="ProductModel.MetaKey" class="text-danger text-sm"></span><br />
+                </div>
+                <div class="col-md-3 mt-2">
+                    <label for="subtypeid">Sub Tipo</label>
+                    <select class="form-select form-select-sm" asp-for="ProductModel.SubTipo" asp-items="@(new SelectList(subTypeList,"PKId","SubType"))">
+                        <option value="">Selecione</option>
+                    </select>
+                    <span asp-validation-for="ProductModel.SubTipo" class="text-danger text-sm"></span><br />
+                </div>
+                <div class="col-md-3 mt-2">
+                    <label for="preco">Preço de Atacado</label>
+                    <input type="number" asp-for="ProductModel.PrecoAtacado" class="form-control form-control-sm" id="preco" />
+                    <span asp-validation-for="ProductModel.PrecoAtacado" class="text-danger text-sm"></span><br />
+                </div>
+                <div class="col-md-3 mt-2">
+                    <label for="lucro">Margem de Lucro</label>
+                    <input type="number" asp-for="ProductModel.Lucro" class="form-control form-control-sm" id="lucro" />
+                    <span asp-validation-for="ProductModel.Lucro" class="text-danger text-sm"></span><br />
+                </div>
+                <div class="col-md-3 mt-2">
+                    <label for="peso">Peso</label>
+                    <input type="number" asp-for="ProductModel.Peso" class="form-control form-control-sm" id="peso" placeholder="em gramas" />
+                    <span asp-validation-for="ProductModel.Peso" class="text-danger text-sm"></span><br />
+                </div>
+                <div class="col-md-3 mt-2">
+                    <div class="form-check">
+                        <input type="checkbox" id="estoque" class="form-check-input" asp-for="ProductModel.Estoque" />
+                        <label for="estoque" class="form-check-label">Em Estoque</label>
+                    </div>
+                </div>
+                <div class="col-md-3 mt-2">
+                    <div class="form-check">
+                        <input type="checkbox" id="promocao" class="form-check-input" asp-for="ProductModel.Promocao" />
+                        <label for="promocao" class="form-check-label">Em Promoção</label>
+                    </div>
+                </div>
+                <div class="col-md-3 mt-2">
+                    <label for="dias">Disponível em</label>
+                    <input type="number" asp-for="ProductModel.DiasDisp" class="form-control form-control-sm" id="dias" placeholder="dias" />
+                    <span asp-validation-for="ProductModel.DiasDisp" class="text-danger text-sm"></span><br />
+                </div>
+                <div class="col-md-3 mt-2"></div>
+                <div class="col-md-12">
+                    <input type="submit" class="btn btn-sm btn-primary" value="Criar" />
+                    <br /><br />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

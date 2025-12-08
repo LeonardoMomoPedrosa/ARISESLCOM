@@ -1,0 +1,117 @@
+﻿@using ARISESLCOM.Models.Reports;
+@using ARISESLCOM.Helpers;
+@using SLCOMLIB.Helpers
+@model List<DayReportModel>
+
+@{
+    var freteTps = Model.Select(s => s.Fretetp).Distinct();
+    var modoPagtos = Model.Select(s => s.Modopagto).Distinct();
+    var month = ViewBag.Month as DateTime?;
+    var cupom = ViewBag.Cupom as string ?? "AQUAFLOW";
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a asp-action="CupomReportSelect">Relatório de Cupom</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Relatório de Cupom - @cupom</li>
+            </ol>
+        </nav>
+        <div class="col bg-light border">
+            <h5>Relatório de Cupom: @cupom</h5>
+            @if (month.HasValue)
+            {
+                <p>Mês: @month.Value.ToString("MMM/yyyy", new System.Globalization.CultureInfo("pt-BR"))</p>
+            }
+            <table class="table table-xsm table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Site
+                        </th>
+                        <th>
+                            SL
+                        </th>
+                        <th>
+                            Data
+                        </th>
+                        <th>
+                            Enviado
+                        </th>
+                        <th>
+                            NF
+                        </th>
+                        <th>
+                            Cliente
+                        </th>
+                        <th>
+                            Cidade/UF
+                        </th>
+                        <th class="rset">
+                            Valor
+                        </th>
+                        <th class="rset">
+                            Frete
+                        </th>
+                        <th>
+                            Forma Pagto.
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Pkid</td>
+                            <td>@item.Lionorderid</td>
+                            <td>@item.Data</td>
+                            <td>@item.Datamdst</td>
+                            <td>@item.Notafiscal</td>
+                            <td>@item.Nome</td>
+                            <td>@item.Cidade / @item.Estado</td>
+                            <td class="rset">@item.Valorpago.ToString("F")</td>
+                            <td class="rset">@item.Frete.ToString("F")</td>
+                            <td>@Html.Raw(LibPageLabelHelper.ModoPagtoLabelDict[item.Modopagto])</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5">Total de Pedidos: @Model.Count</td>
+                        <td></td>
+                        <td class="rset"><b>Total</b></td>
+                        <td class="rset"><b>R$ @Model.Sum(s => s.Valorpago).ToString("F")</b></td>
+                    </tr>
+                    @foreach (var modoItem in modoPagtos)
+                    {
+                        var tot = Model.Where(s => s.Modopagto.Equals(modoItem)).Select(s => s.Valorpago).Sum();
+                        <tr>
+                            <td colspan="6"></td>
+                            <td class="rset">@Html.Raw(LibPageLabelHelper.ModoPagtoLabelDict[modoItem])</td>
+                            <td class="rset">R$ @tot.ToString("F")</td>
+                        </tr>
+                    }
+                    @foreach (var freteTp in freteTps)
+                    {
+                        var tot = Model.Where(s => s.Fretetp.Equals(freteTp)).Select(s => s.Frete).Sum();
+                        <tr>
+                            <td colspan="6"></td>
+                            <td class="rset">Frete @Html.Raw(LibPageLabelHelper.FreteTpLabelDict[freteTp])</td>
+                            <td></td>
+                            <td class="rset">R$ @tot.ToString("F")</td>
+                        </tr>
+                    }
+                    <tr>
+                    <tr>
+                        <td colspan="6"></td>
+                        <td class="rset">Juros Total</td>
+                        <td class="rset">R$ @Model.Select(s => s.Juros).Sum()</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+

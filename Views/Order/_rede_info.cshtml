@@ -1,0 +1,150 @@
+﻿@model ARISESLCOM.Models.OrderSummaryViewModel;
+
+<div class="rede-info-container">
+    @if (Model.Parc > 1)
+    {
+        // Só mostra linha de frete se não for "Cliente Retira"
+        if (!Model.FreteTp.Equals(SLCOMLIB.Helpers.LibConsts.FRETE_CLIENTE_RETIRA))
+        {
+            var freteAprovado = Model.REDESTATUS_SHIP?.ToUpper() == "APROVADO";
+            var freteFalhou = !string.IsNullOrEmpty(Model.REDESTATUS_SHIP) && !freteAprovado;
+            <div class="rede-item">
+                <span class="rede-label">Frete:</span>
+                <span class="rede-status @(string.IsNullOrEmpty(Model.REDESTATUS_SHIP) ? "status-pending" : (freteAprovado ? "status-approved" : "status-failed"))">
+                    @(string.IsNullOrEmpty(Model.REDESTATUS_SHIP) ? "Pendente" : Model.REDESTATUS_SHIP)
+                    @if (!string.IsNullOrEmpty(Model.REDESTATUSDESC_SHIP) && freteFalhou)
+                    {
+                        <span class="rede-error-reason">(@Model.REDESTATUSDESC_SHIP)</span>
+                    }
+                </span>
+                <div class="rede-codes">
+                    <small>Auth: @Model.AUTHCODE_SHIP | TID: @Model.TID_SHIP | NSU: @Model.NSU_SHIP</small>
+                </div>
+            </div>
+        }
+        var produtoAprovado = Model.REDESTATUS?.ToUpper() == "APROVADO";
+        var produtoFalhou = !string.IsNullOrEmpty(Model.REDESTATUS) && !produtoAprovado;
+        <div class="rede-item">
+            <span class="rede-label">Produtos:</span>
+            <span class="rede-status @(string.IsNullOrEmpty(Model.REDESTATUS) ? "status-pending" : (produtoAprovado ? "status-approved" : "status-failed"))">
+                @(string.IsNullOrEmpty(Model.REDESTATUS) ? "Pendente" : Model.REDESTATUS)
+                @if (!string.IsNullOrEmpty(Model.REDESTATUSDESC) && produtoFalhou)
+                {
+                    <span class="rede-error-reason">(@Model.REDESTATUSDESC)</span>
+                }
+            </span>
+            <div class="rede-codes">
+                <small>Auth: @Model.AUTHCODE | TID: @Model.TID | NSU: @Model.NSU</small>
+            </div>
+        </div>
+    }
+    else if (Model.Parc == 1)
+    {
+        var statusAprovado = Model.REDESTATUS?.ToUpper() == "APROVADO";
+        var statusFalhou = !string.IsNullOrEmpty(Model.REDESTATUS) && !statusAprovado;
+        <div class="rede-item">
+            <span class="rede-label">Prod + Frete:</span>
+            <span class="rede-status @(string.IsNullOrEmpty(Model.REDESTATUS) ? "status-pending" : (statusAprovado ? "status-approved" : "status-failed"))">
+                @(string.IsNullOrEmpty(Model.REDESTATUS) ? "Pendente" : Model.REDESTATUS)
+                @if (!string.IsNullOrEmpty(Model.REDESTATUSDESC) && statusFalhou)
+                {
+                    <span class="rede-error-reason">(@Model.REDESTATUSDESC)</span>
+                }
+            </span>
+            <div class="rede-codes">
+                <small>Auth: @Model.AUTHCODE | TID: @Model.TID | NSU: @Model.NSU</small>
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.First6))
+    {
+        <div class="card-info">
+            <i class="fas fa-credit-card"></i>
+            <span class="card-number">@($"{Model.First6}XXXXXX{Model.Last4}")</span>
+            <span class="card-name">@Model.NomeCC</span>
+        </div>
+    }
+</div>
+
+<style>
+.rede-info-container {
+    font-size: 0.8rem;
+}
+
+.rede-item {
+    margin-bottom: 6px;
+    padding: 4px 0;
+}
+
+.rede-label {
+    font-weight: 600;
+    color: #495057;
+    margin-right: 6px;
+}
+
+.rede-status {
+    font-weight: 700;
+    margin-right: 8px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.status-approved {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.status-failed {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+.status-pending {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+}
+
+.rede-codes {
+    margin-top: 2px;
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
+.card-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 6px 8px;
+    background: #fff;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.card-info i {
+    color: #007bff;
+}
+
+.card-number {
+    font-weight: 600;
+    color: #495057;
+    font-family: monospace;
+}
+
+.card-name {
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
+.rede-error-reason {
+    font-size: 0.7rem;
+    font-weight: normal;
+    margin-left: 4px;
+    opacity: 0.9;
+}
+</style>

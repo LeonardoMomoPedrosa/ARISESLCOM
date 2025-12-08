@@ -1,0 +1,156 @@
+﻿@using ARISESLCOM.Helpers
+@model List<ARISESLCOM.Models.OrderSummaryViewModel>
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><a href="/Order/Search">Buscar Pedido</a></li>
+            </ol>
+        </nav>
+    </div>
+    <div class="bg-light border px-2">
+        <h5 class="mb-3">Resultado da Busca</h5>
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>Pedido</th>
+                    <th>Data</th>
+                    <th>Cliente</th>
+                    <th>Situação</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <a asp-action="ShowOrder" asp-controller="Order" asp-route-id="@item.PKId">@item.PKId</a>
+                            @if (item.Status == "V" && item.Via == "C" && !string.IsNullOrEmpty(item.Track))
+                            {
+                                <i class="bi bi-airplane-fill text-primary ms-2" 
+                                   style="cursor: pointer;" 
+                                   data-bs-toggle="modal" 
+                                   data-bs-target="#rastreamentoModal"
+                                   data-track="@item.Track"
+                                   onclick="carregarRastreamento('@item.Track')"
+                                   title="Rastrear pedido"></i>
+                            }
+                        </td>
+                        <td>@item.Data</td>
+                        <td>@item.CustomerName</td>
+                        <td>@PageLabelHelper.HeaderNewOrderDict[item.Status]</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal de Rastreamento -->
+<div class="modal fade" id="rastreamentoModal" tabindex="-1" aria-labelledby="rastreamentoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-3">
+            <div class="modal-header pb-2">
+                <h5 class="modal-title" id="rastreamentoModalLabel">Rastreamento de Encomenda</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-2" id="rastreamentoModalBody">
+                <div class="text-center py-2">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2 mb-0 small">Carregando informações de rastreamento...</p>
+                </div>
+            </div>
+            <div class="modal-footer pt-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function carregarRastreamento(codigoRastreamento) {
+            const modalBody = document.getElementById('rastreamentoModalBody');
+            modalBody.innerHTML = `
+                <div class="text-center py-2">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2 mb-0 small">Carregando informações de rastreamento...</p>
+                </div>
+            `;
+
+            fetch(`/Order/GetRastreamento/${codigoRastreamento}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao buscar rastreamento');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.objetos && data.objetos.length > 0) {
+                        const objeto = data.objetos[0];
+                        let html = `
+                            <div class="mb-2">
+                                <h6 class="mb-1">Código: <strong>${objeto.codObjeto}</strong></h6>
+                                ${objeto.tipoPostal ? `<p class="mb-1 small text-muted">${objeto.tipoPostal.descricao}</p>` : ''}
+                                ${objeto.dtPrevista ? `<p class="mb-0 small text-muted">Previsão: ${new Date(objeto.dtPrevista).toLocaleDateString('pt-BR')}</p>` : ''}
+                            </div>
+                            <hr class="my-2">
+                            <h6 class="mb-2 small fw-bold">Eventos do Rastreamento</h6>
+                            <div class="timeline">
+                        `;
+
+                        if (objeto.eventos && objeto.eventos.length > 0) {
+                            objeto.eventos.forEach((evento, index) => {
+                                const dataEvento = new Date(evento.dtHrCriado).toLocaleString('pt-BR');
+                                const unidadeInfo = evento.unidade ? 
+                                    `${evento.unidade.endereco ? evento.unidade.endereco.cidade : ''}${evento.unidade.endereco && evento.unidade.endereco.uf ? '/' + evento.unidade.endereco.uf : ''}` : '';
+                                
+                                html += `
+                                    <div class="card mb-2 rounded-2 ${index === 0 ? 'border-primary border-2' : ''}">
+                                        <div class="card-body p-2">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="card-title mb-1 small fw-semibold">${evento.descricao}</h6>
+                                                    ${evento.detalhe ? `<p class="card-text text-muted mb-1 small">${evento.detalhe}</p>` : ''}
+                                                    <p class="card-text mb-0 small text-muted"><i class="bi bi-clock"></i> ${dataEvento}</p>
+                                                    ${unidadeInfo ? `<p class="card-text mb-0 small text-muted"><i class="bi bi-geo-alt"></i> ${unidadeInfo}</p>` : ''}
+                                                </div>
+                                                ${index === 0 ? '<span class="badge bg-primary small">Mais Recente</span>' : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            html += '<p class="text-muted small mb-0">Nenhum evento encontrado.</p>';
+                        }
+
+                        html += '</div>';
+                        modalBody.innerHTML = html;
+                    } else {
+                        modalBody.innerHTML = '<p class="text-muted small mb-0">Nenhuma informação de rastreamento encontrada.</p>';
+                    }
+                })
+                .catch(error => {
+                    modalBody.innerHTML = `
+                        <div class="alert alert-danger py-2 rounded-2" role="alert">
+                            <h6 class="alert-heading small mb-1">Erro ao buscar rastreamento</h6>
+                            <p class="mb-0 small">${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // Limpar modal ao fechar
+        document.getElementById('rastreamentoModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('rastreamentoModalBody').innerHTML = '';
+        });
+    </script>
+}

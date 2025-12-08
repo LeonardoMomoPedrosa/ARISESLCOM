@@ -1,0 +1,217 @@
+﻿@model List<ARISESLCOM.Models.ProductViewModel>
+@inject IConfiguration Configuration
+@{
+    var siteBaseUrl = Configuration["SiteApi:Servers:0:BaseUrl"]?.TrimEnd('/');
+}
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+    document.querySelectorAll('.tbox-preco').forEach(tboxPreco => {
+        tboxPreco.addEventListener('blur', () => {
+            var formElement = tboxPreco.closest('form');
+            const tboxLucro = formElement.querySelector('.tbox-lucro');
+            const tboxPFinal = formElement.querySelector('.tbox-pfinal');
+            tboxPFinal.value = (tboxPreco.value * (1 + tboxLucro.value/100)).toFixed(4);
+        });
+    });
+
+    document.querySelectorAll('.tbox-lucro').forEach(tboxLucro => {
+        tboxLucro.addEventListener('blur', () => {
+            var formElement = tboxLucro.closest('form');
+            const tboxPreco = formElement.querySelector('.tbox-preco');
+            const tboxPFinal = formElement.querySelector('.tbox-pfinal');
+            tboxPFinal.value = (tboxPreco.value * (1 + tboxLucro.value/100)).toFixed(4);
+        });
+    });
+
+    document.querySelectorAll('.tbox-pfinal').forEach(tboxPFinal => {
+        tboxPFinal.addEventListener('blur', () => {
+            var formElement = tboxPFinal.closest('form');
+            const tboxPreco = formElement.querySelector('.tbox-preco');
+            const tboxLucro = formElement.querySelector('.tbox-lucro');
+            //tboxPreco.value = (tboxPFinal.value / (1 + tboxLucro.value/100)).toFixed(4);
+            tboxLucro.value = ((tboxPFinal.value / tboxPreco.value - 1) * 100).toFixed(4);
+        });
+    });
+
+    document.querySelectorAll('.update-img').forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+            var formElement = this.closest('form');
+            const divAlert = formElement.querySelector('.updAlert');
+            const divSpin = formElement.querySelector('.spin');
+
+            commLibrary.slfetch('/Product/EditSave', 'POST', formElement, divSpin, divAlert, 'Erro ao atualizar produto');
+
+        });
+    });
+
+    document.querySelectorAll('.delete-img').forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            if (confirm('O produto será apagado')) {
+                if (confirm('Deseja mesmo apagar?')) {
+                    var formElement = this.closest('form');
+                    const divAlert = formElement.querySelector('.updAlert');
+                    const divSpin = formElement.querySelector('.spin');
+                    const hiddenId = formElement.querySelector('.hiddenId');
+                    commLibrary.slfetch('/Product/Delete?id='+hiddenId.value, 'DELETE', formElement, divSpin, undefined, 'Erro ao deletar produto', formElement);
+                }
+            }
+        });
+    });
+
+    // Upload de imagem movido para product-edit.js
+});
+</script>
+@{
+    var configObj = Context.RequestServices.GetService(typeof(Microsoft.Extensions.Configuration.IConfiguration)) as Microsoft.Extensions.Configuration.IConfiguration;
+    var imgBaseUrl = configObj?["ImagePreview:BaseUrl"] ?? "";
+    var siteImagePath = configObj?["ImagePreview:SiteImagePath"] ?? "images/fotosup/prodimg";
+}
+@foreach (var item in Model)
+{
+    <form class="update-form">
+        <input type="hidden" asp-for="@item.PKId" class="hiddenId" />
+        <table class="table table-sm table-striped table-hover">
+            <tr>
+                <td>
+                    <table class="table table-sm">
+                        <tr>
+                            <td colspan="3">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-text" style="width:90px;background-color:darkgray;"><b>@item.PKId</b></div>
+                                    <input type="text" class="table-xsm form-control form-control-sm" asp-for="@item.Nome" value="@item.Nome" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-text" style="width:90px;">Meta Nome</div>
+                                    <input type="text" class="table-xsm form-control form-control-sm" asp-for="@item.MetaNome" value="@item.MetaNome" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-text" style="width:90px;">Meta Keys</div>
+                                    <input type="text" class="table-xsm form-control form-control-sm" asp-for="@item.MetaKey" value="@item.MetaKey" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-text" style="width:90px;">Video</div>
+                                    <input type="text" class="form-control form-control-sm" asp-for="@item.Video" value="@item.Video" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="40%">
+                                <textarea class="form-control form-control-sm" asp-for="@item.Descricao" rows="5">@item.Descricao</textarea>
+                            </td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="item.Ativo" id="ativoCheck" @(item.Ativo.Equals("true") ? "checked" : "") />
+                                    <label class="form-check-label custom-small" for="ativoCheck">Ativo</label>
+                                    <br />
+                                    <input class="form-check-input" type="checkbox" id="estoqueCheck" name="item.Estoque" @(item.Estoque.Equals("true") ? "checked" : "") />
+                                    <label class="form-check-label custom-small" for="estoqueCheck">Estoque</label>
+                                    <br />
+                                    <input class="form-check-input" type="checkbox" id="promoCheck" name="item.Promocao" @(item.Promocao.Equals("true") ? "checked" : "") />
+                                    <label class="form-check-label custom-small" for="promoCheck">Promo</label>
+                                    <br />
+                                    <input class="form-check-input" type="checkbox" id="recomCheck" name="item.Recomenda" @(item.Recomenda.Equals("true") ? "checked" : "") />
+                                    <label class="form-check-label custom-small" for="recomCheck">Recom.</label>
+                                    <br />
+                                    <input class="form-check-input" type="checkbox" id="nopacCheck" name="item.NoPac" @(item.NoPac.Equals("true") ? "checked" : "") />
+                                    <label class="form-check-label custom-small" for="nopacCheck">No PAC</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="row">
+                                    <div class="col-md-12 mb-2">
+@{
+    var hasImg = !string.IsNullOrEmpty(item.NomeFoto);
+    var currentSrc = hasImg ? $"{imgBaseUrl?.TrimEnd('/')}/{siteImagePath}/{item.PKId}/{item.NomeFoto}" : "";
+}
+                                        <div class="image-upload-form" data-base-url="@imgBaseUrl" data-site-image-path="@siteImagePath" enctype="multipart/form-data">
+                                            <div class="input-group input-group-sm mb-1">
+                                                <input type="file" name="file" accept="image/*" class="form-control form-control-sm" />
+                                                <input type="hidden" name="id" value="@item.PKId" />
+                                                <button class="btn btn-sm btn-secondary upload-btn" type="button">Alterar imagem</button>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <img src="@currentSrc" class="preview-img border" style="max-width: 90px; max-height: 90px; @(hasImg ? "" : "display:none;")" alt="preview" />
+                                                <div class="small text-muted current-file-name">Atual: @item.NomeFoto</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="fornId" class="text-sm">Forn.</label>
+                                        <input type="number" asp-for="@item.IdFornecedor" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="peso" class="text-sm">Peso (gr)</label>
+                                        <input type="number" asp-for="@item.Peso" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="minJuros" class="text-sm">Min. Juros</label>
+                                        <input type="number" asp-for="@item.MinParcJuros" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="dispDias" class="text-sm">Disp.(dias)</label>
+                                        <input type="number" asp-for="@item.DiasDisp" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="ordem" class="text-sm">Ordem</label>
+                                        <input type="number" asp-for="@item.DisplayOrder" class="form-control form-control-sm" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label for="atacado" class="text-sm">Preço atacado</label>
+                                        <input type="number" id="atacado" asp-for="@item.PrecoAtacado" class="form-control form-control-sm tbox-preco" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="precoAnt" class="text-sm">Preço Ant.</label>
+                                        <input type="number" id="precoAnt" asp-for="@item.PrecoAnt" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="lucro" class="text-sm">Lucro (%)</label>
+                                        <input type="number" id="lucro" asp-for="@item.Lucro" class="form-control form-control-sm tbox-lucro" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="preco" class="text-sm">Preço Final R$</label>
+                                        <input type="text" id="preco" value="@item.GetPrecoFinal()" class="form-control form-control-sm tbox-pfinal" />
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col">
+                                                <div id="alert" class="alert alert-sm alert-primary d-none updAlert fade" role="alert">
+                                                </div>
+                                                <div class="spinner-border text-primary d-none spin" role="status"></div>
+                                            </div>
+                                            <div class="col text-end">
+                                                <input type="image" src="~/images/update.png" class="update-img" title="Atualizar Item" />
+                                                <input type="image" src="~/images/delete.png" class="delete-img" title="Deletar Item" style="margin-left: 20px;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </form>
+}
+

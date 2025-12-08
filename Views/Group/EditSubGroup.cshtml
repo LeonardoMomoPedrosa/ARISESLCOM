@@ -1,0 +1,101 @@
+﻿@model ARISESLCOM.Models.SubGroupViewModel;
+<script src="~/js/commLibrary.js"></script>
+<script>
+       document.addEventListener('DOMContentLoaded', () => {
+
+       document.querySelectorAll('.update-img').forEach(button => {
+           button.addEventListener('click', function (event) {
+               event.preventDefault();
+               var formElement = this.closest('form');
+               const divAlert = formElement.querySelector('.updAlert');
+               const divSpin = undefined;
+
+               commLibrary.slfetch('/Group/PatchSubGroup', 'PATCH', formElement, divSpin, divAlert, 'Erro ao atualizar sub grupo');
+
+           });
+       });
+
+       document.querySelectorAll('.delete-img').forEach(button => {
+           button.addEventListener('click', function (event) {
+               event.preventDefault();
+
+               if (confirm('O sub grupo será apagado')) {
+                   if (confirm('Deseja mesmo apagar?')) {
+                       var formElement = this.closest('form');
+                       const divAlert = formElement.querySelector('.updAlert');
+                       const divSpin = undefined;
+                       const hiddenTypeId = formElement.querySelector('.hiddenTypeId');
+                       const hiddenSubTypeId = formElement.querySelector('.hiddenSubTypeId');
+                       result = commLibrary.slfetch('/Group/DeleteSubGroup?typeId='+hiddenTypeId.value+'&subTypeId='+hiddenSubTypeId.value, 'DELETE', formElement, divSpin, divAlert, 'Erro ao deletar sub grupo', formElement);
+                   }
+               }
+           });
+       });
+    });
+</script>
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/Product/EditSubGroupSelect">Editar Sub Grupo - Tipo</a></li>
+                <li class="breadcrumb-item">Editar</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5 class="mb-4">Editar Sub Grupos</h5>
+        <div class="container" style="background-color:aliceblue;">
+            <form action="/Group/NewSub" method="POST">
+                <input type="hidden" asp-for="@Model.IdTipo" />
+                <div class="row row-cols-2">
+                    <div class="col">
+                        <input type="text" required placeholder="Novo Sub Grupo" class="form-control form-control-sm mt-2" asp-for="@Model.NewModel.SubType" />
+                    </div>
+                    <div class="col">
+                    </div>
+                    <div class="col">
+                        <textarea required placeholder="Descrição do Novo Sub Grupo" class="form-control form-control-sm mt-1 mb-2" asp-for="@Model.NewModel.Description" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-3" style="height:30px;">
+                        <input type="image" src="~/images/add.png" class="mt-2" title="Novo Item" />&nbsp;&nbsp;
+                    </div>
+                </div>
+                <hr />
+            </form>
+        </div>
+        @foreach (var item in Model.SubGroupList)
+        {
+            <div class="container striped">
+                <form class="update-form">
+                    <div class="row row-cols-2">
+                        <div class="col-md-8">
+                            <input type="hidden" asp-for="@item.PKId" class="hiddenSubTypeId" />
+                            <input type="hidden" asp-for="@item.TypeId" class="hiddenTypeId" />
+                            <input type="text" class="form-control form-control-sm mt-2" asp-for="@item.SubType" />
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-text" style="width:90px;">Meta Nome</div>
+                                <input type="text" class="table-xsm form-control form-control-sm" asp-for="@item.MetaName"/>
+                            </div>
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-text" style="width:90px;">Meta Keys</div>
+                                <input type="text" class="table-xsm form-control form-control-sm" asp-for="@item.MetaKeys" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                        </div>
+                        <div class="col-md-8">
+                            <textarea class="form-control form-control-sm mt-1 mb-2" asp-for="@item.Description" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-4" style="height:30px;">
+                            <input type="image" src="~/images/update.png" class="update-img mt-2" title="Atualizar Item" />&nbsp;&nbsp;
+                            <input type="image" src="~/images/delete.png" class="delete-img" title="Deletar Item" />
+                            <div id="alert" class="alert alert-xsm alert-primary d-none updAlert fade mt-2" role="alert"></div>
+                        </div>
+                    </div>
+                    <hr />
+                </form>
+            </div>
+        }
+    </div>
+</div>

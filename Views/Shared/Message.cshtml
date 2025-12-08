@@ -1,0 +1,35 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model ARISESLCOM.Models.ActionResultModel;
+@{
+    Dictionary<string, string> imageDict = new()
+    {
+        {ActionResultModel.WARNING,"warning.png" },
+        {ActionResultModel.SUCCESS,"success.png" },
+        {ActionResultModel.ERROR,"error.png" }
+    };
+}
+<div class="container">
+    <div class="col bg-light border px-3">
+        <img src="~/images/@imageDict[Model.Status]" style="width:100px;" />
+        <p>@Model.Message</p>
+        <br />
+        @if (Model.ButtonType.Equals(ActionResultModel.BUTTON_TYPE_BACK))
+        {
+            <a href='@Url.Action(Model.Action,Model.Controller)/@Model.Param' class="btn btn-sm btn-primary">Voltar</a>
+        }
+        else if (Model.ButtonType.Equals(ActionResultModel.BUTTON_TYPE_CONTIUE))
+        {
+            if (Model.ParamName != null && Model.ParamName.Length > 0)
+            {
+                <a href='@Url.Action(Model.Action,Model.Controller)?@Model.ParamName=@Model.Param' class="btn btn-sm btn-primary">Continuar</a>
+            }
+            else
+            {
+                <a href='@Url.Action(Model.Action,Model.Controller)/@Model.Param' class="btn btn-sm btn-primary">Continuar</a>
+            }
+        }
+        <section class="mb-3"></section>
+    </div>
+</div>

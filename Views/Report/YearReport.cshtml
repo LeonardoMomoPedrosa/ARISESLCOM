@@ -1,0 +1,73 @@
+﻿@using ARISESLCOM.Models.Reports;
+@model List<YearReportModel>
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item">Evolução Mensal</li>
+            </ol>
+        </nav>
+        <div class="col bg-light border">
+            <h5>Evolução Mensal</h5>
+            <table class="table table-xsm table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Mês
+                        </th>
+                        <th>
+                            Ano
+                        </th>
+                        <th class="rset">
+                            Total
+                        </th>
+                        <th class="rset">
+                            Crédito
+                        </th>
+                        <th class="rset">
+                            % Crédito
+                        </th>
+                        <th class="rset">
+                            Juros
+                        </th>
+                        <th class="rset">
+                            Frete
+                        </th>
+                        <th class="rset">
+                            % Frete
+                        </th>
+                        <th class="rset">
+                            Num. Ped.
+                        </th>
+                        <th class="rset">
+                            Ped./Dia
+                        </th>
+                        <th class="rset">
+                            Ticket M.
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Mes</td>
+                            <td>@item.Ano</td>
+                            <td class="rset">@item.ValorVenda.ToString("C")</td>
+                            <td class="rset">@item.Credito.ToString("C")</td>
+                            <td class="rset">@((item.Credito / item.ValorVenda).ToString("P"))</td>
+                            <td class="rset">@item.Juros.ToString("C")</td>
+                            <td class="rset">@item.Frete.ToString("C")</td>
+                            <td class="rset">@((item.Frete / item.ValorVenda).ToString("P"))</td>
+                            <td class="rset">@item.Num_ped</td>
+                            <td class="rset">@((item.Num_ped / item.Days).ToString("F"))</td>
+                            <td class="rset">@((item.ValorVenda / item.Num_ped).ToString("F"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

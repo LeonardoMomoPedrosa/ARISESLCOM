@@ -1,0 +1,76 @@
+﻿@using ARISESLCOM.Models.Reports;
+@model List<MonthReportModel>
+
+@{
+    var totalAmount = Model.Select(s => s.Total).Sum();
+    var totalNumPedidos = Model.Select(s => s.NumPedidos).Sum();
+
+    //calcula num pedidos por dia
+    DateTime selectedMonth = ViewBag.Month;
+    var daysInMonth = DateTime.DaysInMonth(selectedMonth.Year, selectedMonth.Month);
+    if (selectedMonth.ToString("yyyyMM").Equals(DateTime.Today.ToString("yyyyMM")))
+    {
+        daysInMonth = DateTime.Today.Day;
+    }
+
+    var orderPerDay = (decimal) totalNumPedidos / daysInMonth;
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a asp-action="MonthSelect">Fat. Mensal Data</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Fat. Mensal</li>
+            </ol>
+        </nav>
+        <div class="col bg-light border">
+            <h5>Faturamento Mensal</h5>
+            @ViewBag.Month.ToString("MM/yyyy")
+            <table class="table table-xsm table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            Dia
+                        </th>
+                        <th class="rset">
+                            Total
+                        </th>
+                        <th class="rset">
+                            Cédito
+                        </th>
+                        <th class="rset">
+                            Total Pedidos
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Dia</td>
+                            <td class="rset">@item.Total.ToString("F")</td>
+                            <td class="rset">@item.Credito.ToString("F")</td>
+                            <td class="rset">@item.NumPedidos</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th></th>
+                        <th class="rset">@totalAmount.ToString("C")</th>
+                        <th class="rset">@Model.Select(s => s.Credito).Sum().ToString("C")</th>
+                        <th class="rset">@totalNumPedidos</th>
+                    </tr>
+                    <tr>
+                        <td class="rset"></td>
+                        <td class="rset">Ticket Médio @((totalAmount / totalNumPedidos).ToString("C"))</td>
+                        <td></td>
+                        <td class="rset">Pedidos por dia @orderPerDay.ToString("F")</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>

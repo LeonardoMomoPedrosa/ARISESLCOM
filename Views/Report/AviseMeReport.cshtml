@@ -1,0 +1,114 @@
+﻿@model List<ARISESLCOM.Models.Reports.AviseMeReportModel>
+@using ARISESLCOM.Helpers
+@inject IConfiguration Configuration
+@{
+    var imgBaseUrl = Configuration["ImagePreview:BaseUrl"] ?? "";
+    var siteImagePath = Configuration["ImagePreview:SiteImagePath"] ?? "images/fotosup/prodimg";
+}
+
+<div class="container mt-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Relatório Avise-me</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm">
+        <div class="card-header" style="background-color: #4a90e2; color: white;">
+            <h5 class="mb-0">🚦 Relatório Avise-me</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 100px;">Foto</th>
+                                <th>Produto</th>
+                                <th style="width: 140px;" class="text-center" nowrap>Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                var hasImg = !string.IsNullOrEmpty(item.ProductImage);
+                                var imgSrc = hasImg ? $"{imgBaseUrl?.TrimEnd('/')}/{siteImagePath}/{item.ProductId}/{item.ProductImage}" : "";
+                                
+                                <tr>
+                                    <td>
+                                        @if (hasImg)
+                                        {
+                                            <img src="@imgSrc" style="max-width: 80px; max-height: 80px; object-fit: cover;" class="img-thumbnail rounded" alt="produto" />
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light rounded p-3 text-center">
+                                                <span class="text-muted">📷</span>
+                                                <p class="text-muted small mb-0 mt-2">Sem foto</p>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td class="align-middle">
+                                        <span class="fw-semibold">@Html.Raw(PageLabelHelper.FormatProductName(item.ProductName))</span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <span class="badge fs-6 px-3 py-2" style="background-color: #28a745; opacity: 0.85;">@item.Count</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3 text-muted text-center">
+                    <small>📊 Total de produtos: @Model.Count</small>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <span class="text-muted display-1">📭</span>
+                    <p class="text-muted mt-3">Nenhum produto na lista de "Avise-me" no momento.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 8px;
+    }
+
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+    }
+
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .img-thumbnail {
+        border: 2px solid #dee2e6;
+        transition: transform 0.2s;
+    }
+
+    .img-thumbnail:hover {
+        transform: scale(1.05);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+</style>

@@ -1,0 +1,149 @@
+﻿@model ARISESLCOM.Models.DestaqueViewModel
+
+@{
+    ViewData["Title"] = "Modal Página de Entrada";
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/Gerencia/ConfigGerais">Config. Gerais</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Modal Página de Entrada</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Gerenciar Modal Página de Entrada</h5>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModalModal">
+                    <i class="fas fa-edit"></i> @(Model != null ? "Editar" : "Adicionar") Modal
+                </button>
+            </div>
+
+            @if (Model != null && !string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <div class="card mb-3">
+                    <div class="card-img-container" style="height: 400px; overflow: hidden;">
+                        <img src="@Model.ImageUrl" class="card-img-top" alt="Modal Image" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-title">@Model.Arquivo</h6>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Link: @(string.IsNullOrEmpty(Model.Link) ? "Nenhum" : Model.Link)
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-image fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhuma imagem configurada</h5>
+                    <p class="text-muted">Clique em "Adicionar Modal" para configurar o modal da página de entrada</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModalModal" tabindex="-1" aria-labelledby="editModalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalModalLabel">@(Model != null ? "Editar" : "Adicionar") Modal Página de Entrada</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editModalForm" enctype="multipart/form-data">
+                @if (Model != null)
+                {
+                    <input type="hidden" id="editModalId" name="id" value="@Model.PKId">
+                }
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="modalImageFile" class="form-label">Imagem @(Model == null ? "*" : "(opcional)")</label>
+                        <input type="file" class="form-control" id="modalImageFile" name="file" accept="image/*" @(Model == null ? "required" : "")>
+                        <div class="form-text">Formatos aceitos: JPG, JPEG, PNG, WEBP</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalImageLink" class="form-label">Link (opcional)</label>
+                        <input type="url" class="form-control" id="modalImageLink" name="link" placeholder="https://exemplo.com" value="@(Model?.Link ?? "")">
+                        <div class="form-text">URL para onde o modal deve redirecionar</div>
+                    </div>
+                    <div class="mb-3">
+                        <div id="modalImagePreview" class="text-center" style="display: none;">
+                            <img id="previewModalImg" src="" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" id="modalSpinner"></span>
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/commLibrary.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Image preview
+        document.getElementById('modalImageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('modalImagePreview');
+            const previewImg = document.getElementById('previewModalImg');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+
+        // Form submission
+        document.getElementById('editModalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const spinner = document.getElementById('modalSpinner');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            spinner.classList.remove('d-none');
+            submitBtn.disabled = true;
+            
+            fetch('@Url.Action("UploadModalEntradaImage", "Gerencia")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erro: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Erro: ' + error.message);
+            })
+            .finally(() => {
+                spinner.classList.add('d-none');
+                submitBtn.disabled = false;
+            });
+        });
+    });
+</script>
+

@@ -1,0 +1,20 @@
+﻿@model List<ARISESLCOM.Models.ProductViewModel>
+@{
+    var pname = Context.Request.Query["pname"].ToString();
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/Product/EditNameSelect">Editar por marca</a></li>
+                <li class="breadcrumb-item active">@pname</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5>Editar por Marca</h5>
+        @await Html.PartialAsync("_ProductListPartialView", Model)
+    </div>
+</div>

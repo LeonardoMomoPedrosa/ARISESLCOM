@@ -1,0 +1,33 @@
+﻿@model ARISESLCOM.Models.CustomerSearchViewModel
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Consulta Cliente</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <h5>Consultar Cliente</h5>
+        <div>
+            Preencha um dos campos abaixo
+        </div>
+        <div class="mt-3">
+            <form method="POST" asp-controller="Customer" asp-action="Search">
+                <label for="name">Nome do Cliente</label>
+                <input type="text" class="form-control form-control-sm w-50" asp-for="@Model.Name" />
+                <label for="name" class="mt-3">Email do Cliente</label>
+                <input type="text" class="form-control form-control-sm w-50" asp-for="@Model.Email" />
+                <span asp-validation-for="@Model.Email" class="text-danger text-sm"></span>
+                <label for="name" class="mt-3">Id do Cliente</label>
+                <input type="number" class="form-control form-control-sm w-25" asp-for="@Model.CustomerId" />
+                <input type="submit" class="btn btn-sm btn-primary mt-4" value="Consultar" /><br /><br />
+            </form>
+        </div>
+    </div>
+</div>

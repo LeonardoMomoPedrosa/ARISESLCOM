@@ -1,0 +1,180 @@
+﻿@{
+    ViewData["Title"] = "Configurações Gerais";
+    var isBlackFriday = ViewBag.IsBlackFriday ?? false;
+}
+@Html.AntiForgeryToken()
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Config. Gerais</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border rounded p-4">
+        <h5 class="mb-3">Configurações Gerais</h5>
+        <div class="col-12 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Banner Promocional</h6>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="blackFridayCheckbox" 
+                               @(isBlackFriday ? "checked" : "") 
+                               style="width: 3rem; height: 1.5rem; cursor: pointer;">
+                        <label class="form-check-label ms-2" for="blackFridayCheckbox" style="font-size: 1.1rem; font-weight: 500;">
+                            BLACK FRIDAY
+                        </label>
+                    </div>
+                    <small class="text-muted d-block mt-2">
+                        @(isBlackFriday ? "Modo Black Friday ativo" : "Modo promocional padrão ativo")
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 col-md-8">
+                            <h6 class="card-title mb-3">Modal Página de Entrada</h6>
+                            <p class="card-text">Configure a imagem e link do modal exibido na página de entrada do site.</p>
+                            
+                            @{
+                                var modalViewModel = ViewBag.ModalViewModel as ARISESLCOM.Models.DestaqueViewModel;
+                            }
+                            
+                            @if (modalViewModel != null && !string.IsNullOrEmpty(modalViewModel.ImageUrl))
+                            {
+                                <small class="text-muted d-block mb-3">
+                                    Link: @(string.IsNullOrEmpty(modalViewModel.Link) ? "Nenhum" : modalViewModel.Link)
+                                </small>
+                            }
+                            
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="@Url.Action("ModalEntrada", "Gerencia")" class="btn btn-primary">
+                                    <i class="fas fa-cog"></i> Gerenciar Modal
+                                </a>
+                                @if (modalViewModel != null)
+                                {
+                                    <button type="button" class="btn btn-danger" id="deleteModalBtn">
+                                        <i class="fas fa-trash"></i> Apagar Modal
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4 mt-3 mt-md-0">
+                            <label class="form-label fw-bold">Preview:</label>
+                            @if (modalViewModel != null && !string.IsNullOrEmpty(modalViewModel.ImageUrl))
+                            {
+                                <div class="border rounded p-2 bg-white">
+                                    <img src="@modalViewModel.ImageUrl" alt="Modal Preview" class="img-fluid" style="max-height: 150px; width: 100%; object-fit: contain;">
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="border rounded p-3 bg-light text-center" style="min-height: 120px; display: flex; align-items: center; justify-content: center;">
+                                    <div>
+                                        <i class="fas fa-image fa-2x text-muted mb-2"></i>
+                                        <p class="text-muted mb-0 small">Nenhum modal configurado</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('blackFridayCheckbox').addEventListener('change', function() {
+            const isBlackFriday = this.checked;
+            const confirmMessage = isBlackFriday 
+                ? 'Deseja ativar o modo BLACK FRIDAY? Isso alterará o banner promocional do site.'
+                : 'Deseja desativar o modo BLACK FRIDAY? O banner promocional voltará ao modo padrão.';
+            
+            if (confirm(confirmMessage)) {
+                // Desabilitar checkbox durante o processamento
+                this.disabled = true;
+                
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                fetch('@Url.Action("UpdateBlackFriday", "Gerencia")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify(isBlackFriday)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Configuração atualizada com sucesso!');
+                        // Atualizar texto de status
+                        const statusText = document.querySelector('.text-muted');
+                        if (statusText) {
+                            statusText.textContent = isBlackFriday 
+                                ? 'Modo Black Friday ativo' 
+                                : 'Modo promocional padrão ativo';
+                        }
+                    } else {
+                        alert('Erro: ' + data.message);
+                        // Reverter checkbox em caso de erro
+                        this.checked = !isBlackFriday;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao atualizar configuração. Tente novamente.');
+                    // Reverter checkbox em caso de erro
+                    this.checked = !isBlackFriday;
+                })
+                .finally(() => {
+                    // Reabilitar checkbox
+                    this.disabled = false;
+                });
+            } else {
+                // Reverter checkbox se usuário cancelar
+                this.checked = !isBlackFriday;
+            }
+        });
+
+        // Delete modal button
+        const deleteModalBtn = document.getElementById('deleteModalBtn');
+        if (deleteModalBtn) {
+            deleteModalBtn.addEventListener('click', function() {
+                if (confirm('Tem certeza que deseja apagar o modal da página de entrada? Esta ação não pode ser desfeita.')) {
+                    this.disabled = true;
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Apagando...';
+                    
+                    fetch('@Url.Action("DeleteModalEntrada", "Gerencia")', {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Modal apagado com sucesso!');
+                            location.reload();
+                        } else {
+                            alert('Erro: ' + data.message);
+                            this.disabled = false;
+                            this.innerHTML = originalText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        alert('Erro ao apagar modal. Tente novamente.');
+                        this.disabled = false;
+                        this.innerHTML = originalText;
+                    });
+                }
+            });
+        }
+    </script>
+}
+

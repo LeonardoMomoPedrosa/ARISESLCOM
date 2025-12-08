@@ -1,0 +1,10 @@
+
+*.dll
+*.cache
+/obj
+/bin
+/.vs
+/publish
+appsettings.json
+appsettings.Development.json
+*.user

@@ -1,0 +1,171 @@
+﻿@{
+    ViewData["Title"] = "Listar Pedidos - Gerência E-commerce";
+    string pageTitle = "Listar Pedidos";
+}
+
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@pageTitle</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="text-center mb-2">
+        <p class="text-muted small">Selecione o tipo de pedidos que deseja visualizar</p>
+    </div>
+
+    <!-- Order Status Cards -->
+    <div class="row g-2">
+        <div class="col-md-6 col-lg-4">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="A" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm order-status-card">
+                    <div class="card-body text-center">
+                        <div class="status-icon mb-2">🆕</div>
+                        <h6 class="card-title mb-1">Pedidos <strong>Novos</strong></h6>
+                        <small class="text-muted">Novos pedidos aguardando</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="G" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm order-status-card">
+                    <div class="card-body text-center">
+                        <div class="status-icon mb-2">💳</div>
+                        <h6 class="card-title mb-1">Pedidos com <strong>Cartão de Crédito</strong></h6>
+                        <small class="text-muted">Pagamentos com cartão</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="P" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm order-status-card">
+                    <div class="card-body text-center">
+                        <div class="status-icon mb-2">📄</div>
+                        <h6 class="card-title mb-1">Aguardando <strong>comprovante</strong></h6>
+                        <small class="text-muted">Via depósito</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        
+        <div class="col-md-6 col-lg-4">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="C" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm order-status-card">
+                    <div class="card-body text-center">
+                        <div class="status-icon mb-2">📦</div>
+                        <h6 class="card-title mb-1">Pagamento confirmado, <strong>em preparação</strong></h6>
+                        <small class="text-muted">Em processo de preparação</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="Q" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm order-status-card">
+                    <div class="card-body text-center">
+                        <div class="status-icon mb-2">🔒</div>
+                        <h6 class="card-title mb-1">Pedidos com animais em <strong>quarentena</strong></h6>
+                        <small class="text-muted">Período de quarentena</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="S" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm order-status-card">
+                    <div class="card-body text-center">
+                        <div class="status-icon mb-2">📦</div>
+                        <h6 class="card-title mb-1">Aguardando <strong>estoque</strong></h6>
+                        <small class="text-muted">Disponibilidade de produtos</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="E" class="text-decoration-none corollary">
+                <div class="card h-100 border-0 shadow-sm order-status-card">
+                    <div class="card-body text-center">
+                        <div class="status-icon mb-2">⏸️</div>
+                        <h6 class="card-title mb-1">Em espera <strong>sem previsão</strong></h6>
+                        <small class="text-muted">Espera indefinida</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="R" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm order-status-card">
+                    <div class="card-body text-center">
+                        <div class="status-icon mb-2">🏪</div>
+                        <h6 class="card-title mb-1">Pedidos <strong>prontos para retirada</strong></h6>
+                        <small class="text-muted">Retirada na loja</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+            <a asp-area="" asp-controller="Order" asp-action="Listar" asp-route-tp="N" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm order-status-card">
+                    <div class="card-body text-center">
+                        <div class="status-icon mb-2">❌</div>
+                        <h6 class="card-title mb-1">Cartão <strong>não autorizado</strong></h6>
+                        <small class="text-muted">Cartão recusado</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+    </div>
+</div>
+
+<style>
+.order-status-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.order-status-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.status-icon {
+    font-size: 1.5rem;
+}
+
+.card-body {
+    padding: 0.75rem;
+}
+
+.card-title {
+    color: #333;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem !important;
+}
+
+.card-title:hover {
+    color: #333;
+}
+
+.text-decoration-none:hover .card-title {
+    color: #333;
+}
+
+.container {
+    max-height: 100vh;
+    overflow: hidden;
+}
+</style>

@@ -1,0 +1,106 @@
+@model List<ARISESLCOM.DTO.TrackerPedidoViewModel>
+@{
+    ViewData["Title"] = "Ver Rastreamento";
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Ver Rastreamento</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border rounded p-4">
+        <h5 class="mb-3">Ver Rastreamento</h5>
+        
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @ViewBag.Error
+            </div>
+        }
+        
+        @if (Model != null && Model.Count > 0)
+        {
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Num. Pedido</th>
+                                <th>Nome do Cliente</th>
+                                <th>Rastreamento</th>
+                                <th class="text-center">Origem</th>
+                                <th class="text-center">Via</th>
+                                <th>Status</th>
+                                <th>Data de Atualização</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                var viaDescription = TrackingHelper.GetViaDescription(item.Via);
+                                var viaStyle = TrackingHelper.GetViaStyle(item.Via);
+                                var origemDescription = !string.IsNullOrWhiteSpace(item.Origem) 
+                                    ? TrackingHelper.GetSourceDescription(item.Origem) 
+                                    : "-";
+                                var origemBadgeStyle = TrackingHelper.GetSourceBadgeStyle(item.Origem);
+                                <tr>
+                                    <td class="fw-semibold">@item.NumPedido</td>
+                                    <td>@item.NomeCliente</td>
+                                    <td class="font-monospace">@item.Rastreamento</td>
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrWhiteSpace(item.Origem))
+                                        {
+                                            <span class="badge" style="@origemBadgeStyle">@origemDescription</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge" style="@viaStyle">@viaDescription</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(item.TipoEnvio == "C" ? "bg-warning text-dark" : "bg-info")">
+                                            @item.Status
+                                        </span>
+                                    </td>
+                                    <td>@(item.DataAtualizacao?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-2 text-muted small">
+                    Total de registros: @Model.Count
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">
+                    Nenhum rastreamento encontrado.
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .table {
+            font-size: 0.9rem;
+        }
+        .table th {
+            white-space: nowrap;
+        }
+        .font-monospace {
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+}

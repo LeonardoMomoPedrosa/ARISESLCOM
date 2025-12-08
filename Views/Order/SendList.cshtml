@@ -1,0 +1,32 @@
+﻿@using SLCOMLIB.Helpers;
+@using ARISESLCOM.Helpers;
+@{
+    string tp = LibConsts.ORDER_STATUS_PAGTO_CONF_PREP;
+}
+@model List<ARISESLCOM.Models.OrderSummaryViewModel>;
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Enviar Pedidos</li>
+            </ol>
+        </nav>
+        <div class="col bg-light border">
+            <h5 class="mb-3">Enviar Pedidos</h5>
+            <form method="post" asp-action="Send">
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <div class="border mt-2">
+                        <input type="checkbox" asp-for="@Model[i].SendAction">&nbsp;&nbsp;<a asp-area="" asp-controller="Order" asp-action="ShowOrder" asp-route-orderId="@Model[i].PKId"><b>@Model[i].PKId</b></a> - <b>@Model[i].CustomerName</b> - @Model[i].Data<br />
+                        Destinat&aacute;rio: @Model[i].ReceiverName @Model[i].ReceiverLastName
+                        <input type="hidden" asp-for="@Model[i].PKId" />
+                        <input type="hidden" asp-for="@Model[i].Status" />
+                    </div>
+                }
+                <input type="submit" value="Enviar" class="btn btn-sm btn-primary mt-2" /><br />
+            </form>
+        </div>
+    </div>
+</div>

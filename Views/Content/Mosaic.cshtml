@@ -1,0 +1,310 @@
+﻿@model List<List<ARISESLCOM.Models.DestaqueViewModel>>
+@{
+    ViewData["Title"] = "Gerenciar Mosaico";
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Gerenciar Mosaico</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Gerenciar Mosaico da Página Inicial</h5>
+                <span class="text-muted">Mosaico fixo 3x8 - Apenas atualização de imagens e links</span>
+            </div>
+                    <div class="alert alert-info" id="alertDiv" style="display: none;"></div>
+                    
+                    <div class="mosaic-grid">
+                        @for (int row = 0; row < 8; row++)
+                        {
+                            <div class="mosaic-row">
+                                @for (int col = 0; col < 3; col++)
+                                {
+                                    var item = Model[row][col];
+                                    var frequency = GetFrequencyForPosition(row, col);
+                                    <div class="mosaic-item" data-row="@row" data-col="@col" data-frequency="@frequency">
+                                        <div class="mosaic-item-content">
+                                            @if (!string.IsNullOrEmpty(item?.ImageUrl))
+                                            {
+                                                <img src="@item.ImageUrl" alt="Mosaic Image" class="mosaic-image" />
+                                                <div class="mosaic-overlay">
+                                                    <button type="button" class="btn btn-sm btn-primary" onclick="editMosaicItem(@row, @col, @item.PKId, '@item.Link')">
+                                                        <i class="fas fa-edit"></i> Editar
+                                                    </button>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="mosaic-placeholder">
+                                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                                    <p class="text-muted">Posição @(row + 1),@(col + 1)</p>
+                                                    <button type="button" class="btn btn-sm btn-success" onclick="addMosaicItem(@row, @col)">
+                                                        <i class="fas fa-plus"></i> Adicionar
+                                                    </button>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para adicionar/editar item do mosaico -->
+<div class="modal fade" id="mosaicModal" tabindex="-1" aria-labelledby="mosaicModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mosaicModalLabel">Adicionar/Editar Item do Mosaico</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="mosaicForm" enctype="multipart/form-data">
+                    <input type="hidden" id="mosaicRow" name="row" />
+                    <input type="hidden" id="mosaicCol" name="col" />
+                    <input type="hidden" id="mosaicId" name="id" />
+                    
+                    <div class="mb-3">
+                        <label for="mosaicFile" class="form-label">Imagem (opcional)</label>
+                        <input type="file" class="form-control" id="mosaicFile" name="file" accept="image/*">
+                        <div class="form-text">Formatos aceitos: JPG, PNG, GIF. Deixe em branco para manter a imagem atual ou atualizar apenas o link</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="mosaicLink" class="form-label">Link</label>
+                        <input type="url" class="form-control" id="mosaicLink" name="link" placeholder="https://exemplo.com">
+                        <div class="form-text">URL para onde a imagem deve redirecionar</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Preview da Imagem</label>
+                        <div id="imagePreview" class="text-center">
+                            <img id="previewImg" src="" alt="Preview" class="img-thumbnail" style="max-width: 120px; max-height: 90px; display: none;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="saveMosaicBtn">
+                    <span class="spinner-border spinner-border-sm d-none" id="mosaicSpinner"></span>
+                    <span id="mosaicBtnText">Salvar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.mosaic-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mosaic-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.mosaic-item {
+    width: 200px;
+    height: 150px;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.mosaic-item-content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mosaic-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mosaic-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.mosaic-item:hover .mosaic-overlay {
+    opacity: 1;
+}
+
+.mosaic-placeholder {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+.mosaic-placeholder i {
+    margin-bottom: 10px;
+}
+
+.mosaic-item.has-image {
+    border-style: solid;
+    border-color: #28a745;
+}
+</style>
+
+<script>
+let currentRow = -1;
+let currentCol = -1;
+
+function addMosaicItem(row, col) {
+    currentRow = row;
+    currentCol = col;
+    document.getElementById('mosaicId').value = '';
+    document.getElementById('mosaicRow').value = row;
+    document.getElementById('mosaicCol').value = col;
+    document.getElementById('mosaicLink').value = '';
+    document.getElementById('mosaicFile').value = '';
+    document.getElementById('previewImg').style.display = 'none';
+    document.getElementById('mosaicModalLabel').textContent = 'Adicionar Item do Mosaico';
+    document.getElementById('mosaicBtnText').textContent = 'Adicionar';
+    
+    const modal = new bootstrap.Modal(document.getElementById('mosaicModal'));
+    modal.show();
+}
+
+function editMosaicItem(row, col, id, link) {
+    currentRow = row;
+    currentCol = col;
+    document.getElementById('mosaicId').value = id;
+    document.getElementById('mosaicRow').value = row;
+    document.getElementById('mosaicCol').value = col;
+    document.getElementById('mosaicLink').value = link || '';
+    document.getElementById('mosaicFile').value = '';
+    document.getElementById('previewImg').style.display = 'none';
+    document.getElementById('mosaicModalLabel').textContent = 'Editar Item do Mosaico';
+    document.getElementById('mosaicBtnText').textContent = 'Atualizar';
+    
+    const modal = new bootstrap.Modal(document.getElementById('mosaicModal'));
+    modal.show();
+}
+
+// Preview da imagem
+document.getElementById('mosaicFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewImg = document.getElementById('previewImg');
+            previewImg.src = e.target.result;
+            previewImg.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Salvar item do mosaico
+document.getElementById('saveMosaicBtn').addEventListener('click', function() {
+    const form = document.getElementById('mosaicForm');
+    const formData = new FormData(form);
+    
+    // Adicionar o ID se estiver editando
+    const id = document.getElementById('mosaicId').value;
+    if (id) {
+        formData.append('id', id);
+    }
+    
+    const spinner = document.getElementById('mosaicSpinner');
+    const btnText = document.getElementById('mosaicBtnText');
+    const saveBtn = document.getElementById('saveMosaicBtn');
+    
+    spinner.classList.remove('d-none');
+    btnText.textContent = 'Salvando...';
+    saveBtn.disabled = true;
+    
+    fetch('/Content/UploadMosaicImage', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Recarregar a página para mostrar as mudanças
+            location.reload();
+        } else {
+            alert('Erro: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Erro: ' + error.message);
+    })
+    .finally(() => {
+        spinner.classList.add('d-none');
+        btnText.textContent = 'Adicionar';
+        saveBtn.disabled = false;
+    });
+});
+
+// Função auxiliar para calcular frequência (mesma do controller)
+function GetFrequencyForPosition(row, col) {
+    const actualRow = row + 1;
+    const actualCol = col + 1;
+    
+    switch (actualRow) {
+        case 1: return actualCol; // 1, 2, 3
+        case 2: return actualCol + 3; // 4, 5, 6
+        case 3: return actualCol + 6; // 7, 8, 9
+        case 4: return actualCol === 1 ? 9.1 : actualCol === 2 ? 9.2 : 9.3; // 9.1, 9.2, 9.3
+        case 5: return actualCol + 9; // 10, 11, 12
+        case 6: return actualCol + 12; // 13, 14, 15
+        case 7: return actualCol + 15; // 16, 17, 18
+        case 8: return actualCol === 1 ? 18.1 : actualCol === 2 ? 18.2 : 18.3; // 18.1, 18.2, 18.3
+        default: return 0;
+    }
+}
+</script>
+
+@functions {
+    private decimal GetFrequencyForPosition(int row, int col)
+    {
+        int actualRow = row + 1;
+        int actualCol = col + 1;
+
+        return actualRow switch
+        {
+            1 => actualCol, // 1, 2, 3
+            2 => actualCol + 3, // 4, 5, 6
+            3 => actualCol + 6, // 7, 8, 9
+            4 => actualCol == 1 ? 9.1m : actualCol == 2 ? 9.2m : 9.3m, // 9.1, 9.2, 9.3
+            5 => actualCol + 9, // 10, 11, 12
+            6 => actualCol + 12, // 13, 14, 15
+            7 => actualCol + 15, // 16, 17, 18
+            8 => actualCol == 1 ? 18.1m : actualCol == 2 ? 18.2m : 18.3m, // 18.1, 18.2, 18.3
+            _ => 0
+        };
+    }
+}
+

@@ -1,0 +1,328 @@
+﻿@model List<ARISESLCOM.Models.OrderViewModel>
+
+@{
+    ViewData["Title"] = "Processamento de Cobranças";
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Processamento e.Rede</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5><i class="fas fa-credit-card"></i> Processamento e.Rede</h5>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-primary me-2 mt-2" onclick="window.location.reload()">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div id="loadingContainer" class="loading-container" style="display: none;">
+    <div class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Aguarde Processando...</span>
+        </div>
+        <div class="mt-2">Processando pagamento...</div>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="row">
+        @foreach (var order in Model)
+        {
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header header-blue text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-shopping-cart me-1"></i>
+                                <a href="/Order/ShowOrder/@order.OrderSummaryViewModel.PKId" target="_blank" class="text-white text-decoration-none">
+                                    Pedido #@order.OrderSummaryViewModel.PKId
+                                </a>
+                            </h6>
+                            <small style="opacity: 0.9;">@order.OrderSummaryViewModel.Data</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong class="d-block mb-1">
+                                <i class="fas fa-user me-1"></i>@order.OrderSummaryViewModel.CustomerDName
+                            </strong>
+                            <small class="text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>@order.OrderSummaryViewModel.Cidade / @order.OrderSummaryViewModel.Estado
+                            </small>
+                        </div>
+                        
+                        <hr />
+                        
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <small class="text-muted d-block">Produtos</small>
+                                <strong class="text-success">R$ @((order.OrderSummaryViewModel.ParcVal * order.OrderSummaryViewModel.Parc).ToString("N2"))</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Frete</small>
+                                <strong class="text-info">R$ @order.OrderSummaryViewModel.Frete.ToString("N2")</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted">Parcelas: </small>
+                            <span class="badge bg-secondary">@order.OrderSummaryViewModel.Parc x</span>
+                        </div>
+                        
+                        <hr />
+
+                        @if (order.OrderSummaryViewModel.Parc > 1)
+                        {
+                            var produtoAprovado = order.OrderSummaryViewModel.REDESTATUS?.ToUpper() == "APROVADO";
+                            var produtoFalhou = !string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUS) && !produtoAprovado;
+                            var produtoBgClass = produtoFalhou ? "bg-warning-light" : "";
+                            
+                            <div class="mb-2 p-2 rounded @produtoBgClass">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="flex-grow-1 me-2">
+                                        <small class="text-muted d-block">Produto</small>
+                                        <span class="badge @(string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUS) ? "text-muted" : (order.OrderSummaryViewModel.REDESTATUS.ToUpper() == "APROVADO" ? "text-success" : "text-danger"))" style="font-size: 0.95rem;">
+                                            @(string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUS) ? "Pendente" : order.OrderSummaryViewModel.REDESTATUS)
+                                        </span>
+                                        @if (!string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUSDESC) && !produtoAprovado)
+                                        {
+                                            <br/><small class="fw-bold">@order.OrderSummaryViewModel.REDESTATUSDESC</small>
+                                        }
+                                    </div>
+                                    @if (produtoAprovado)
+                                    {
+                                        <div class="text-success" style="font-size: 2rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                            </svg>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" action="@Url.Action("ProcessPayment", "Acr")" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="orderId" value="@order.OrderSummaryViewModel.PKId" />
+                                            <input type="hidden" name="chargeType" value="PRODUTO" />
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-play me-1"></i>Processar
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                            
+                            @if (order.OrderSummaryViewModel.Frete > 0)
+                            {
+                                var freteAprovado = order.OrderSummaryViewModel.REDESTATUS_SHIP?.ToUpper() == "APROVADO";
+                                var freteFalhou = !string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUS_SHIP) && !freteAprovado;
+                                var freteBgClass = freteFalhou ? "bg-warning-light" : "";
+                                
+                                <div class="mb-2 p-2 rounded @freteBgClass">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="flex-grow-1 me-2">
+                                            <small class="text-muted d-block">Frete</small>
+                                            <span class="badge @(string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUS_SHIP) ? "text-muted" : (order.OrderSummaryViewModel.REDESTATUS_SHIP.ToUpper() == "APROVADO" ? "text-success" : "text-danger"))" style="font-size: 0.95rem;">
+                                                @(string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUS_SHIP) ? "Pendente" : order.OrderSummaryViewModel.REDESTATUS_SHIP)
+                                            </span>
+                                            @if (!string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUSDESC_SHIP) && !freteAprovado)
+                                            {
+                                                <br/><small class="fw-bold">@order.OrderSummaryViewModel.REDESTATUSDESC_SHIP</small>
+                                            }
+                                        </div>
+                                        @if (freteAprovado)
+                                        {
+                                            <div class="text-success" style="font-size: 2rem;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                                </svg>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <form method="post" action="@Url.Action("ProcessShipping", "Acr")" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="orderId" value="@order.OrderSummaryViewModel.PKId" />
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-truck me-1"></i>Processar
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            var statusAprovado = order.OrderSummaryViewModel.REDESTATUS?.ToUpper() == "APROVADO";
+                            var statusFalhou = !string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUS) && !statusAprovado;
+                            var statusBgClass = statusFalhou ? "bg-warning-light" : "";
+                            
+                            <div class="mb-2 p-2 rounded @statusBgClass">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="flex-grow-1 me-2">
+                                        <small class="text-muted d-block">Status</small>
+                                        <span class="badge @(string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUS) ? "text-muted" : (order.OrderSummaryViewModel.REDESTATUS.ToUpper() == "APROVADO" ? "text-success" : "text-danger"))" style="font-size: 0.95rem;">
+                                            @(string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUS) ? "Pendente" : order.OrderSummaryViewModel.REDESTATUS)
+                                        </span>
+                                        @if (!string.IsNullOrEmpty(order.OrderSummaryViewModel.REDESTATUSDESC) && !statusAprovado)
+                                        {
+                                            <br/><small class="fw-bold">@order.OrderSummaryViewModel.REDESTATUSDESC</small>
+                                        }
+                                    </div>
+                                    @if (statusAprovado)
+                                    {
+                                        <div class="text-success" style="font-size: 2rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                            </svg>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" action="@Url.Action("ProcessFull", "Acr")" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="orderId" value="@order.OrderSummaryViewModel.PKId" />
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-credit-card me-1"></i>Processar
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhum pedido pendente</h5>
+                    <p class="text-muted">Não há pedidos com cartão de crédito aguardando processamento no momento.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .loading-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .loading-spinner {
+        padding: 30px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        text-align: center;
+    }
+
+    .card {
+        transition: all 0.2s ease;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .card-header {
+        font-weight: 500;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .header-blue {
+        background-color: #4a90e2;
+        border-bottom: 2px solid #3a7bc8;
+    }
+
+    .card-header a:hover {
+        text-decoration: underline !important;
+        opacity: 0.9;
+    }
+
+    .bg-warning-light {
+        background-color: #fff3cd;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Garantir que os botões tenham a mesma largura */
+    .btn-sm {
+        min-width: 110px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar loading ao submeter formulários
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const button = form.querySelector('button[type="submit"]');
+                    if (button && !button.disabled) {
+                        // Desabilitar o botão para evitar múltiplos cliques
+                        button.disabled = true;
+                        const originalHtml = button.innerHTML;
+                        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processando...';
+                        
+                        // Mostrar loading
+                        document.getElementById('loadingContainer').style.display = 'flex';
+                    }
+                });
+            });
+
+            // Auto-dismiss alerts após 7 segundos
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                    bsAlert.close();
+                }, 7000);
+            });
+        });
+    </script>
+}

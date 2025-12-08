@@ -1,0 +1,445 @@
+﻿@using ARISESLCOM.Helpers;
+@using ARISESLCOM.Components;
+@using SLCOMLIB.Helpers;
+@model ARISESLCOM.Models.OrderViewModel;
+@{
+    var orderSumm = Model.OrderSummaryViewModel;
+    var orderItems = Model.OrderItemViewModelList;
+    var orderCustomer = Model.CustomerAddressViewModel;
+    var airpModel = Model.AirportViewModel;
+    var buslogModel = Model.BuslogModel;
+
+    string sentStr = "";
+    if (orderSumm.Status.Equals(LibConsts.ORDER_STATUS_ENVIADO))
+    {
+        sentStr = $" - <font color=\"blue\">Enviado em {orderSumm.DataMdSt}</font>";
+    }
+}
+
+<style media="print">
+    body {
+        font-size: 11px !important;
+    }
+
+    .container-fluid {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .print-center {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin: 0 auto !important;
+        text-align: left !important;
+    }
+
+    .print-block {
+        width: 400px;
+        border: 2px solid black;
+        padding: 10px;
+    }
+
+    .table {
+        font-size: 10px;
+        margin-bottom: 0;
+    }
+
+    th, td {
+        padding: 2px !important;
+        vertical-align: top;
+    }
+
+    .breadcrumb,
+    .btn,
+    form,
+    .alert,
+    .spinner-border,
+    .navbar,
+    script,
+    input[type="submit"],
+    input[type="image"],
+    select {
+        display: none !important;
+    }
+
+    .border,
+    .card {
+        border: 1px solid black !important;
+    }
+
+    .h5, h3, h6 {
+        font-size: 14px !important;
+        margin: 4px 0 !important;
+    }
+
+    img {
+        max-width: 80px;
+        height: auto;
+    }
+
+    .mt-2, .mt-1, .mb-2 {
+        margin-top: 2px !important;
+        margin-bottom: 2px !important;
+    }
+
+    .row, .col, .col-md-1, .col-md-2, .col-md-8 {
+        margin: 2px !important;
+        padding: 0 !important;
+    }
+</style>
+<script src="~/js/commLibrary.js"></script>
+<script>
+    jQuery(document).ready(function($) {
+        $("#searchBox").on("keypress", function (event) {
+            if (event.which === 13) {
+                $("#qtdBox").focus();
+                event.preventDefault();
+            }
+        });
+
+        $("#qtdBox").on("keypress", function (event) {
+            if (event.which === 13) {
+                $("#buttonAdd").focus();
+                event.preventDefault();
+            }
+        });
+
+        $("#searchBox").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/Product/GetSuggestions", // Replace with your controller's endpoint
+                    type: "GET",
+                    data: { term: request.term },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2 // Start searching after 2 characters
+        });
+    });
+</script>
+<div class="container-fluid">
+    <div class="d-print-none mb-2">
+        <button class="btn btn-sm btn-secondary" onclick="window.print()">🖨️ Imprimir Pedido</button>
+    </div>
+    <nav class="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/Order/ListarPrevia">Listar Pedidos</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><a href="/Order/Listar/@orderSumm.Status">@PageLabelHelper.HeaderNewOrderDict[orderSumm.Status]</a></li>
+        </ol>
+    </nav>
+    <div class="col border px-2">
+        <span class="h5">Pedido #@orderSumm.PKId</span> - @orderSumm.Lcidade<br />
+        <div class="text-sm">Data do pedido: <b>@orderSumm.Data</b>@Html.Raw(sentStr)</div>
+        <table class="table table-xsm table-striped">
+            <thead>
+                <tr>
+                    <th>Cod.</th>
+                    <th>Produto</th>
+                    <th>Peso</th>
+                    <th>Qtd.</th>
+                    <th>Pre&ccedil;o</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            @foreach (var p in orderItems)
+            {
+                <tr>
+                    <td>
+                        @p.SiteId
+                    </td>
+                    <td>
+                        @Html.Raw(p.ProductName)
+                    </td>
+                    <td>
+                        @p.Weight gr
+                    </td>
+                    <td>
+                        @p.Quantity Un.
+                    </td>
+                    <td>
+                        R$ @p.UnitPrice.ToString("F") /Un.
+                    </td>
+                    <td>
+                        <div class="row">
+                            <div class="col">
+                                R$ @p.GetTotalItemPrice().ToString("F")
+                            </div>
+                            @if (p.SiteId != LibConsts.SPECIAL_PACKAGING_PRODUCT_ID)
+                            {
+                                <div class="col d-none d-md-block">
+                                    <form method="post" asp-action="DelProduct" asp-controller="Order">
+                                        <input type="hidden" name="odpkid" value="@p.PKId" />
+                                        <input type="hidden" name="orderId" value="@orderSumm.PKId" />
+                                        <input type="image" src="~/images/minidel.png" width="8px" onclick="return confirm('Remover @Html.Raw(p.ProductName)?');" />
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>@Model.GetTotalWeightViewStr()</th>
+                    <th></th>
+                    <th></th>
+                    <th>R$ @Model.Get_1_TotalOrderAmount().ToString("F")</th>
+                </tr>
+                @if (orderSumm.Credito > 0)
+                {
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th style="text-align:right;">Crédito</th>
+                        <th>R$ @orderSumm.Credito.ToString("F")</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <td style="text-align:right;">Total com Credito</td>
+                        <td>R$ @Model.Get_2_OrderAmountWithCredit().ToString("F")</td>
+                    </tr>
+                }
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th style="text-align:right;">Desconto @orderSumm.Desconto %</th>
+                    <th>R$ @Model.GetOrderDiscountAmount().ToString("F")</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <td style="text-align:right;">Total com Desconto</td>
+                    <td>R$ @Model.Get_3_OrderAmountWithDiscount().ToString("F")</td>
+                </tr>
+                @if (orderSumm.Parc > 1)
+                {
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <td style="text-align:right;">Parcelas @orderSumm.Parc x R$ @orderSumm.ParcVal.ToString("F")</td>
+                        <td>R$ @orderSumm.GetAmountParc().ToString("F")</td>
+                    </tr>
+                }
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <td style="text-align:right;">Frete @LibPageLabelHelper.FreteTpLabelDict[orderSumm.FreteTp]</td>
+                    <td>R$ @orderSumm.Frete.ToString("F")</td>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th style="text-align:right;">Total com Frete</th>
+                    <th>R$ @Model.GetFinalAmount().ToString("F")</th>
+                </tr>
+            </tfoot>
+        </table>
+        <form method="POST" asp-controller="Order" asp-action="AddProduct">
+            <input type="hidden" name="orderId" value="@orderSumm.PKId" />
+            <input type="hidden" name="customerId" value="@orderSumm.CustomerId" />
+            <div class="row mb-2">
+                <div class="col-md-8">
+                    <input type="text" id="searchBox" name="prodname" class="form-control form-control-sm col-auto" placeholder="Adicionar Produto...">
+                </div>
+                <div class="col-md-1">
+                    <input type="text" id="qtdBox" name="qtd" class="form-control form-control-sm" placeholder="Qtd" value="1" style="width: 45px;">
+                </div>
+                <div class="col-md-2 text-start">
+                    <input type="submit" id="buttonAdd" class="btn btn-sm btn-primary" value="Adicionar" />
+                </div>
+                <div class="col-md-1">
+                    <div class="spinner-border text-primary d-none spin" id="divSpin" role="status"></div>
+                    <div id="alert" class="alert alert-sm alert-primary d-none updAlert fade" id="divAlert" role="alert"></div>
+                </div>
+            </div>
+        </form>
+        @if (orderSumm.FreteTp.Equals(SLCOMLIB.Helpers.LibConsts.FRETE_AEROPORTO) && orderSumm.IdAeroporto > 0)
+        {
+            <div class="card mt-2" style="width: 70%">
+                <div class="card-body">
+                    <h6 class="card-title">Frete Aeroporto</h6>
+                    <div class="text-sm"><b>Regi&atilde;o @airpModel.Regiao</b> - @airpModel.Cidade / @airpModel.Estado</div>
+                    <div class="text-sm"><b>End:</b> @airpModel.Logradouro @airpModel.Numero</div>
+                    <div class="text-sm">@airpModel.Complemento</div>
+                    <div class="text-sm"><b>Bairro: </b>@airpModel.Bairro</div>
+                </div>
+            </div>
+        }
+        else if (orderSumm.FreteTp.Equals(SLCOMLIB.Helpers.LibConsts.FRETE_BUSLOG) && orderSumm.IdAeroporto > 0)
+        {
+            <div class="card" style="width: 70%">
+                <div class="card-body">
+                    <h6 class="card-title">BUSLOG Cliente Retira</h6>
+                    <div class="text-sm"><b>Unidade @buslogModel.Unidade</b> / @buslogModel.Estado</div>
+                    <div class="text-sm"><b>End:</b> @buslogModel.Logradouro @buslogModel.Complemento</div>
+                    <div class="text-sm">@buslogModel.Bairro</div>
+                    <div class="text-sm"><b>CEP: </b>@buslogModel.CEP</div>
+                </div>
+            </div>
+        }
+        else if (orderSumm.FreteTp.Equals(SLCOMLIB.Helpers.LibConsts.FRETE_BUSLOG) && orderSumm.IdAeroporto == 0)
+        {
+            <div class="card" style="width: 70%">
+                <div class="card-body">
+                    <h6 class="card-title">BUSLOG Entrega</h6>
+                </div>
+            </div>
+        }
+        else if (orderSumm.FreteTp.Equals(SLCOMLIB.Helpers.LibConsts.FRETE_CLIENTE_RETIRA))
+        {
+            <div class="card" style="width: 70%">
+                <div class="card-body">
+                    <h6 class="card-title">Cliente Retira</h6>
+                    <div class="text-sm">Frete cliente retira.</div>
+                </div>
+            </div>
+        }
+        <table class="table table-xsm" style="width:70%">
+            <tbody>
+                <tr>
+                    <td><b>Comprador:</b></td>
+                    <td>@orderSumm.CustomerName - @orderSumm.CustomerId</td>
+                </tr>
+                <tr>
+                    <td><b>E-mail:</b></td>
+                    <td>@orderSumm.Email</td>
+                </tr>
+                <tr>
+                    <td><b>Destinat&aacute;rio:</b></td>
+                    <td>@orderCustomer.GetFullName</td>
+                </tr>
+                <tr>
+                    <td><b>Endere&ccedil;o:</b></td>
+                    <td>@orderCustomer.Ruav No. @orderCustomer.Numero</td>
+                    <td><b>CEP:</b> @orderCustomer.CEP</td>
+                </tr>
+                <tr>
+                    <td><b>Bairro:</b></td>
+                    <td>@orderCustomer.Bairro</td>
+                    <td><b>Complemento:</b> @orderCustomer.Complemento</td>
+                </tr>
+                <tr>
+
+                    <td><b>Cidade/UF:</b></td>
+                    <td>@orderCustomer.Cidade / @orderCustomer.Estado</td>
+                    <td><b>Telefone:</b> @orderCustomer.Celular</td>
+                </tr>
+                <tr>
+                    <td><b>CPF:</b></td>
+                    <td>@orderCustomer.CPF</td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="table table-xsm" style="width:70%">
+            <thead>
+                <tr>
+                    <th>Perfil do Cliente</th>
+                    <th>Indicadores de Fraude</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        @await Component.InvokeAsync(nameof(CustomerProfileComponent), new
+                            {
+                                customerId = orderSumm.CustomerId,
+                                orderId = orderSumm.PKId
+                            })
+                    </td>
+                    <td>
+                        @await Component.InvokeAsync(nameof(FraudComponent), new
+                            {
+                                orderId = orderSumm.PKId
+                            })
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <secion class="table-xsm"><b>Pedido no Lion: </b>@(orderSumm.LionOrderId > 0 ? orderSumm.LionOrderId : "")</secion>
+        <section class="mt-1"><b>Modo de Pagamento: </b>@Html.Raw(LibPageLabelHelper.ModoPagtoLabelDict[orderSumm.ModoPagto]) - @orderSumm.Parc parc(s)</section>
+        @if (orderSumm.ModoPagto.Equals(LibConsts.MODO_PAGTO_CARTAO_CREDITO))
+        {
+            @await Html.PartialAsync("_rede_info", orderSumm)
+        }
+        <form method="post" asp-controller="Order" asp-action="ChangeStatus">
+            <div class="row">
+                <label for="dropStatus" class="mt-2">Status:</label>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input type="hidden" name="origStatus" value="@orderSumm.Status" />
+                    <input type="hidden" name="orderId" value="@orderSumm.PKId" />
+                    <select id="dropStatus" name="status" asp-items="@(new SelectList(PageLabelHelper.HeaderNewOrderDict,"Key","Value", orderSumm.Status))" class="form-control form-control-sm">
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="submit" class="btn btn-primary btn-sm" value="Alterar" />
+                </div>
+            </div>
+        </form>
+        <div class="d-print-none mb-2 mt-5">
+            <button class="btn btn-sm btn-secondary" onclick="window.print()">🖨️ Imprimir Pedido</button>
+        </div>
+        <br /><br /><br />
+        <div style="display: flex; gap: 5px; align-items: flex-start;">
+            <div class="print-center print-only">
+                <div class="print-block">
+                    <div class="d-flex">
+                        <div><img src="~/images/aqualogo.png" width="50px;" /></div>
+                        <div class="ms-2"><h3>Pedido #@orderSumm.PKId</h3></div>
+                    </div>
+                    <div><b>Destinatário:</b></div>
+                    <div>@orderCustomer.GetFullName</div>
+                    <div>@orderCustomer.Ruav No.@orderCustomer.Numero</div>
+                    <div>@orderCustomer.Bairro @orderCustomer.Complemento - CEP: @orderCustomer.CEP</div>
+                    <div>@orderCustomer.Cidade / @orderCustomer.Estado</div>
+                    <div>Tel: @orderCustomer.Telefone</div>
+                </div>
+            </div>
+            @if (orderSumm.FreteTp.Equals(SLCOMLIB.Helpers.LibConsts.FRETE_AEROPORTO) && orderSumm.IdAeroporto > 0)
+            {
+                <div class="card mt-2 print-only me-2" style="width: 70%">
+                    <div class="card-body">
+                        <h6 class="card-title">Frete Aeroporto</h6>
+                        <div class="text-sm"><b>Regi&atilde;o @airpModel.Regiao</b> - @airpModel.Cidade / @airpModel.Estado</div>
+                        <div class="text-sm"><b>End:</b> @airpModel.Logradouro @airpModel.Numero</div>
+                        <div class="text-sm">@airpModel.Complemento</div>
+                        <div class="text-sm"><b>Bairro: </b>@airpModel.Bairro</div>
+                    </div>
+                </div>
+            }
+            else if (orderSumm.FreteTp.Equals(SLCOMLIB.Helpers.LibConsts.FRETE_BUSLOG) && orderSumm.IdAeroporto > 0)
+            {
+                <div class="card print-only me-2" style="width: 70%">
+                    <div class="card-body">
+                        <h4>CLIENTE RETIRA - BUSLOG</h4>
+                        <h4>@buslogModel.Unidade / @buslogModel.Estado</h4>
+                    </div>
+                </div>
+            }
+        </div>
+        <br /><br />
+    </div>
+</div>

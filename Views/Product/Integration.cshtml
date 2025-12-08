@@ -1,0 +1,81 @@
+﻿@model List<ARISESLCOM.Models.ProductViewModel>
+@using ARISESLCOM.Helpers;
+<script src="~/js/commLibrary.js"></script>
+<script>
+       document.addEventListener('DOMContentLoaded', () => {
+           document.querySelectorAll('.erpinput').forEach(tbox => {
+               tbox.addEventListener('change', function (event) {
+                var formElement = this.closest('form');
+                const hiddenId = formElement.querySelector('.hiddenId');
+                const divAlert = formElement.querySelector('.updAlert');
+                const erpid = formElement.querySelector('#erpid');
+                const stockmin = formElement.querySelector('#stockmin');
+                commLibrary.slfetch('/Product/PatchERPId?id='+hiddenId.value+'&erpId='+erpid.value+'&erpStockMin='+stockmin.value, 'PATCH', formElement, undefined, divAlert, 'Erro ao atualizar produto');
+               });
+           });
+    });
+</script>
+@{
+    var id = Context.Request.Query["id"].ToString();
+}
+
+<div class="container">
+    <div class="row">
+        <nav class="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/Product/IntegrationSelect">Integração Loja - Tipo</a></li>
+                @if (!id.Equals("") && !id.Equals("0"))
+                {
+                    <li class="breadcrumb-item"><a href="/Product/IntegrationSelectSub?id=@id">Sub Tipo</a></li>
+                }
+            </ol>
+        </nav>
+    </div>
+    <div class="row bg-light border text-sm">
+        <h5>Integração Site-ERP</h5><br />
+        <table class="table table-sm table-striped table-hover mt-2">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <form class="update-form">
+                            <div class="row container">
+                                <div class="col-md-1">
+                                    <input type="hidden" asp-for="@item.PKId" class="hiddenId" />
+                                    Site: @item.PKId
+                                </div>
+                                <div class="col-md-6">
+                                    @Html.Raw(PageLabelHelper.FormatProductName(item.Nome))
+                                </div>
+                                <div class="col-md-1">
+                                    R$ @item.GetPrecoFinal()
+                                </div>
+                                <div class="col-md-2 align-content-center">
+                                    <div class="row">
+                                        <label for="erpid" class="col-sm-5 text-end">Cod. ERP</label>
+                                        <div class="col-sm-7">
+                                            <input type="number" id="erpid" class="form-control form-control-sm erpinput" asp-for="@item.ERPId" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 align-content-center">
+                                    <div class="row">
+                                        <label for="stockmin" class="col-sm-5 text-end">Est.Min:</label>
+                                        <div class="col-sm-5">
+                                            <input type="number" id="stockmin" class="form-control form-control-sm erpinput" asp-for="@item.ERPStockMin" />
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div id="alert" class="spinner-border spin d-none updAlert fade" style="font-size:2px;height:10px;" role="alert">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>

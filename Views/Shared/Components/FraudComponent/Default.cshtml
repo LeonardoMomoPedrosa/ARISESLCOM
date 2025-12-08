@@ -1,0 +1,122 @@
+﻿@model FraudModel
+@using ARISESLCOM.Helpers;
+
+@{
+    var ipCount = Model.FraudIPList.Count;
+    var pwdCount = Model.FraudPWDList.Count;
+    var cepCount = Model.FraudCEPList.Count;
+}
+<section>
+    @if (Model.Confiavel.HasValue && Model.Confiavel.Value > 1)
+    {
+        <span class="text-danger fw-bold">CLIENTE NC</span>
+        @if (ipCount > 0 || cepCount > 0 || pwdCount > 0)
+        {
+            <span>|</span>
+        }
+    }
+    @if (ipCount > 0)
+    {
+        <a class="link-danger" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal">Conflito IP |</a>
+    }
+    @if (cepCount > 0)
+    {
+        <a class="link-danger" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal"> CEP | </a>
+    }
+    @if (pwdCount > 0)
+    {
+        <a class="link-danger" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal">SENHA</a>
+    }
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Relat&oacute;rio de Fraude - Pedido @Model.OrderId</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if (ipCount > 0)
+                    {
+                        <p>IP</p>
+                        <table class="table table-sm table-hover">
+                            <tr>
+                                <th>Id Cliente</th>
+                                <th></th>
+                                <th></th>
+                                <th>&Uacute;ltimo acesso</th>
+                                <th>IP</th>
+                            </tr>
+                            @foreach (var fraudInfo in Model.FraudIPList)
+                            {
+                                <tr>
+                                    <td>@fraudInfo.IdUsuario</td>
+                                    <td>@fraudInfo.Nome</td>
+                                    <td>@fraudInfo.email</td>
+                                    <td>@PageLabelHelper.ShowDtLong(fraudInfo.UltimoAcesso)</td>
+                                    <td>@fraudInfo.IP</td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                    @if (pwdCount > 0)
+                    {
+                        <p>Senha</p>
+                        <table class="table table-sm table-hover">
+                            <tr>
+                                <th>Id Cliente</th>
+                                <th></th>
+                                <th></th>
+                                <th>&Uacute;ltimo acesso</th>
+                                <th>IP</th>
+                            </tr>
+                            @foreach (var fraudInfo in Model.FraudPWDList)
+                            {
+                                <tr>
+                                    <td>@fraudInfo.IdUsuario</td>
+                                    <td>@fraudInfo.Nome</td>
+                                    <td>@fraudInfo.email</td>
+                                    <td>@PageLabelHelper.ShowDtLong(fraudInfo.UltimoAcesso)</td>
+                                    <td>@fraudInfo.IP</td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                    @if (cepCount > 0)
+                    {
+                        <p>CEP</p>
+                        <table class="table table-sm table-hover">
+                            <tr>
+                                <th>ID Cliente</th>
+                                <th>Pedido</th>
+                                <th>Data do Pedido</th>
+                                <th>Nome</th>
+                                <th></th>
+                                <th>&Uacute;ltimo Acesso</th>
+                                <th>IP</th>
+                                <th>CEP</th>
+                                <th>Logradouro</th>
+                            </tr>
+                            @foreach (var fraudInfo in Model.FraudCEPList)
+                            {
+                                <tr>
+                                    <td>@fraudInfo.IdUsuario</td>
+                                    <td>@fraudInfo.OrderId</td>
+                                    <td>@PageLabelHelper.ShowDtShort(fraudInfo.OrderDate)</td>
+                                    <td>@fraudInfo.Nome</td>
+                                    <td>@fraudInfo.email</td>
+                                    <td>@PageLabelHelper.ShowDtLong(fraudInfo.UltimoAcesso)</td>
+                                    <td>@fraudInfo.IP</td>
+                                    <td>@fraudInfo.CEP</td>
+                                    <td>@fraudInfo.Ruav</td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
