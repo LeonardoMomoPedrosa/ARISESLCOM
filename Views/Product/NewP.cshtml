@@ -13,6 +13,10 @@
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/">Home</a></li>
                 <li class="breadcrumb-item"><a asp-controller="Product" asp-action="NewSelect">Novo Produto - Tipo</a></li>
+                @if (Model.IdTipo > 0)
+                {
+                    <li class="breadcrumb-item"><a href="/Product/NewSelectSub?id=@Model.IdTipo">Novo Produto - Sub Tipo</a></li>
+                }
                 <li class="breadcrumb-item active">Dados</li>
             </ol>
         </nav>

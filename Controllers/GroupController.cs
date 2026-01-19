@@ -41,7 +41,8 @@ namespace ARISESLCOM.Controllers
                 var cacheInfo = new List<CacheInvalidateRequest>
                 {
                     new() { Region = SiteCacheKeyUtil.REGION_DRYCATEGORYMODELS, Key = "", CleanRegionInd = true },
-                    new() { Region = SiteCacheKeyUtil.REGION_DRYCATALOGDESC, Key = $"{model.PKId}", CleanRegionInd = false }
+                    new() { Region = SiteCacheKeyUtil.REGION_DRYCATALOGDESC, Key = $"{model.PKId}", CleanRegionInd = false },
+                    new() { Region = SiteCacheKeyUtil.REGION_MENU, Key = "", CleanRegionInd = true }
                 };
 
                 cacheSuccessInd = await _siteCache.InvalidateAsync(cacheInfo);
@@ -76,7 +77,8 @@ namespace ARISESLCOM.Controllers
                 var cacheInfo = new List<CacheInvalidateRequest>
                 {
                     new() { Region = SiteCacheKeyUtil.REGION_DRYCATEGORYMODELS, Key = "", CleanRegionInd = true },
-                    new() { Region = SiteCacheKeyUtil.REGION_FISHCATALOGDESC, Key = $"{model.PKId}", CleanRegionInd = false }
+                    new() { Region = SiteCacheKeyUtil.REGION_FISHCATALOGDESC, Key = $"{model.PKId}", CleanRegionInd = false },
+                    new() { Region = SiteCacheKeyUtil.REGION_MENU, Key = "", CleanRegionInd = true }
                 };
 
                 cacheSuccessInd = await _siteCache.InvalidateAsync(cacheInfo);

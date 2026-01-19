@@ -36,13 +36,44 @@ namespace ARISESLCOM.Models.Domains.DB
             {
                 model.Add(new ProductTypeModel()
                 {
-                    PKId = rd.GetInt("PKId"),
+                    PKId = rd.GetInt("pkid"),
                     Descricao = rd.GetStr("descricao"),
                     Tipo = rd.GetStr("tipo")
                 });
             }
 
             await SetCacheAsync<List<ProductTypeModel>>(cacheKey, model, int.MaxValue);
+            return model;
+        }
+
+        public async Task<List<ProductTypeModel>> GetProductTypeModelsWithProductsAsync()
+        {
+            var model = new List<ProductTypeModel>();
+            String query = @"
+                                select distinct tp.tipo,
+                                        tp.descricao,
+                                        tp.pkid
+                                from tbtipoproduto tp
+                                inner join tbsubtipoproduto stp on tp.pkid = stp.id_tipo
+                                inner join tbProdutos p on (p.id_subtipo = stp.pkid or p.id_subsubtipo = stp.pkid)
+                                where p.ativo = 1
+                                order by tp.tipo
+                            ";
+
+            using SqlCommand command = new("", _dbContext.GetSqlConnection());
+            command.CommandText = query;
+
+            using SLDataReader rd = new(await command.ExecuteReaderAsync());
+            while (rd.Read())
+            {
+                model.Add(new ProductTypeModel()
+                {
+                    PKId = rd.GetInt("pkid"),
+                    Descricao = rd.GetStr("descricao"),
+                    Tipo = rd.GetStr("tipo")
+                });
+            }
+
             return model;
         }
 

@@ -39,17 +39,22 @@ namespace ARISESLCOM.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> NewP(int id)
+        public async Task<IActionResult> NewP(int id, int? sid = null)
         {
             NewProductViewModel model = new()
             {
-                IdTipo = id
+                IdTipo = id,
+                ProductModel = new ProductModel()
             };
             _dbContext.GetSqlConnection().Open();
             try
             {
                 _groupDomainModel.SetContext(_dbContext);
                 model.SubTypeList = await _groupDomainModel.GetProductSubTypeModelsAsync(id);
+                if (sid.HasValue)
+                {
+                    model.ProductModel.SubTipo = sid.Value;
+                }
             }
             finally
             {
@@ -249,6 +254,22 @@ namespace ARISESLCOM.Controllers
             return View(model);
         }
 
+        public async Task<IActionResult> NewSelectSub(int id)
+        {
+            List<ProductSubTypeModel> model;
+            _dbContext.GetSqlConnection().Open();
+            try
+            {
+                _groupDomainModel.SetContext(_dbContext);
+                model = await _groupDomainModel.GetProductSubTypeModelsAsync(id);
+            }
+            finally
+            {
+                await _dbContext.CloseAsync();
+            }
+            return View(model);
+        }
+
         [HttpGet]
         public async Task<IActionResult> Edit(int id, int sid)
         {
@@ -394,23 +415,6 @@ namespace ARISESLCOM.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> AnimalNoStock()
-        {
-            List<ProductModel> model;
-            _dbContext.GetSqlConnection().Open();
-            try
-            {
-                _productDomainModel.SetContext(_dbContext);
-                model = await _productDomainModel.GetProductListByStockDBAsync("A", false);
-            }
-            finally
-            {
-                await _dbContext.CloseAsync();
-            }
-            return View(_productViewMapper.MapProductViewModelList(model));
-        }
-
-        [HttpGet]
         public async Task<IActionResult> ProductStock()
         {
             List<ProductModel> model;
@@ -419,23 +423,6 @@ namespace ARISESLCOM.Controllers
             {
                 _productDomainModel.SetContext(_dbContext);
                 model = await _productDomainModel.GetProductListByStockDBAsync("P", true);
-            }
-            finally
-            {
-                await _dbContext.CloseAsync();
-            }
-            return View(_productViewMapper.MapProductViewModelList(model));
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> AnimalStock()
-        {
-            List<ProductModel> model;
-            _dbContext.GetSqlConnection().Open();
-            try
-            {
-                _productDomainModel.SetContext(_dbContext);
-                model = await _productDomainModel.GetProductListByStockDBAsync("A", true);
             }
             finally
             {
@@ -486,9 +473,20 @@ namespace ARISESLCOM.Controllers
         }
 
         [HttpGet]
-        public IActionResult EditSubGroupSelect()
+        public async Task<IActionResult> EditSubGroupSelect()
         {
-            return View();
+            List<ProductTypeModel> model;
+            _dbContext.GetSqlConnection().Open();
+            try
+            {
+                _groupDomainModel.SetContext(_dbContext);
+                model = await _groupDomainModel.GetProductTypeModelsAsync();
+            }
+            finally
+            {
+                await _dbContext.CloseAsync();
+            }
+            return View(model);
         }
 
         public async Task<IActionResult> IntegrationSelect()

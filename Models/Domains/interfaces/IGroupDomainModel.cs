@@ -5,6 +5,7 @@ namespace ARISESLCOM.Models.Domains.interfaces
     public interface IGroupDomainModel : IDomainModel
     {
         public Task<List<ProductTypeModel>> GetProductTypeModelsAsync();
+        public Task<List<ProductTypeModel>> GetProductTypeModelsWithProductsAsync();
         public Task<List<ProductSubTypeModel>> GetProductSubTypeModelsAsync(int typeId);
         public Task<ActionResultModel> UpdateGroupDBAsync(ProductTypeModel model);
         public Task<ActionResultModel> DeleteGroupAsync(int pkid);
